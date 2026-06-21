@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TechWords">
+<meta name="theme-color" content="#4A7FA5">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>TechWords</title>
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text-1);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{border:none;background:none;cursor:pointer;font-family:inherit;font-size:inherit;color:inherit}
+input,textarea,select{font-family:inherit;font-size:inherit;border:none;outline:none;background:none}
+textarea{resize:none}
+a{text-decoration:none;color:inherit}
+ul{list-style:none}
+
+/* ===== CSS VARIABLES ===== */
+:root{
+  --accent:#4A7FA5;
+  --accent-dark:#2E5F82;
+  --accent-pale:#EBF3FA;
+  --accent-light:#D6E8F5;
+  --bg:#F4F6F9;
+  --bg2:#ECF0F5;
+  --card:#FFFFFF;
+  --text-1:#1B2B3A;
+  --text-2:#4A5E70;
+  --text-3:#8A9BB0;
+  --border:#DDE4EC;
+  --shadow:0 2px 12px rgba(74,95,130,0.08);
+  --shadow-md:0 4px 24px rgba(74,95,130,0.12);
+  --r-sm:10px;
+  --r-md:16px;
+  --r-lg:22px;
+  --r-pill:999px;
+  --nav-h:64px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+  --known:#2D7D5A;--known-bg:#E8F5EF;--known-b:#B7DEC9;
+  --fuzzy:#9B6A1A;--fuzzy-bg:#FEF5E4;--fuzzy-b:#F5D99A;
+  --unknown:#9B2B20;--unknown-bg:#FDEEEC;--unknown-b:#F5BFB9;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#111827;--bg2:#1F2937;--card:#1F2937;
+    --text-1:#F0F4F8;--text-2:#94A3B8;--text-3:#64748B;
+    --border:#2D3748;--shadow:0 2px 12px rgba(0,0,0,0.3);
+    --shadow-md:0 4px 24px rgba(0,0,0,0.4);
+    --accent-pale:#1A2F44;--accent-light:#1E3A52;
+  }
+}
+
+/* ===== LAYOUT ===== */
+#app{position:fixed;inset:0;overflow:hidden;display:flex;flex-direction:column}
+.page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;background:var(--bg);display:none;flex-direction:column;padding-bottom:calc(var(--nav-h) + var(--safe-bot))}
+.page.active{display:flex}
+.page-nofooter{padding-bottom:0}
+.page-header{display:flex;align-items:center;padding:calc(var(--safe-top) + 12px) 20px 12px;gap:12px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;min-height:calc(var(--safe-top) + 56px)}
+.page-title{font-size:18px;font-weight:700;color:var(--text-1);flex:1}
+.page-content{flex:1;padding:16px 20px}
+.btn-icon{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:background .15s}
+.btn-icon:active{background:var(--bg2)}
+svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ===== BOTTOM NAV ===== */
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe-bot));background:var(--card);border-top:1px solid var(--border);display:flex;align-items:flex-start;padding-top:8px;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text-3);font-size:10px;font-weight:500;padding:4px 0;transition:color .2s;cursor:pointer}
+.nav-item.active{color:var(--accent)}
+.nav-item svg{width:22px;height:22px;transition:transform .2s}
+.nav-item.active svg{transform:scale(1.1)}
+
+/* ===== CARDS ===== */
+.card{background:var(--card);border-radius:var(--r-md);box-shadow:var(--shadow);overflow:hidden}
+.card+.card{margin-top:12px}
+.section-label{font-size:12px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin:20px 0 8px}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:var(--r-pill);font-weight:600;font-size:15px;transition:all .15s;cursor:pointer}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:active{background:var(--accent-dark);transform:scale(0.98)}
+.btn-secondary{background:var(--accent-pale);color:var(--accent)}
+.btn-secondary:active{background:var(--accent-light)}
+.btn-full{width:100%;display:flex}
+.btn-danger{background:#FDEEEC;color:var(--unknown)}
+.btn-sm{padding:8px 14px;font-size:13px}
+
+/* ===== CHIPS ===== */
+.chip{display:inline-flex;align-items:center;padding:6px 12px;border-radius:var(--r-pill);font-size:13px;font-weight:500;border:1.5px solid var(--border);background:var(--card);color:var(--text-2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.chip.selected,.chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip:active{transform:scale(0.96)}
+.chip-known{background:var(--known-bg);color:var(--known);border-color:var(--known-b)}
+.chip-fuzzy{background:var(--fuzzy-bg);color:var(--fuzzy);border-color:var(--fuzzy-b)}
+.chip-unknown{background:var(--unknown-bg);color:var(--unknown);border-color:var(--unknown-b)}
+.chips-row{display:flex;gap:8px;overflow-x:auto;padding:4px 0;scrollbar-width:none}
+.chips-row::-webkit-scrollbar{display:none}
+
+/* ===== FORM ===== */
+.form-card{background:var(--card);border-radius:var(--r-md);padding:0;overflow:hidden;box-shadow:var(--shadow)}
+.form-card+.form-card{margin-top:12px}
+.form-card-title{font-size:12px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;padding:14px 16px 0}
+.form-row{padding:10px 16px;display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--border)}
+.form-row:first-of-type{border-top:none}
+.form-label{font-size:12px;color:var(--text-3);font-weight:500}
+.form-input{font-size:15px;color:var(--text-1);padding:4px 0;background:transparent;width:100%}
+.form-input::placeholder{color:var(--text-3)}
+.form-textarea{font-size:14px;color:var(--text-1);padding:4px 0;width:100%;min-height:56px}
+
+/* ===== TAG ===== */
+.tag{display:inline-flex;align-items:center;padding:3px 8px;border-radius:var(--r-pill);font-size:11px;font-weight:500;background:var(--accent-pale);color:var(--accent)}
+.tag+.tag{margin-left:4px}
+
+/* ===== HOME PAGE ===== */
+.home-top{padding:calc(var(--safe-top) + 16px) 20px 0;background:var(--card);border-bottom:1px solid var(--border);padding-bottom:16px}
+.home-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.home-greeting{font-size:22px;font-weight:700;color:var(--text-1)}
+.home-date{font-size:13px;color:var(--text-3);margin-top:2px}
+.streak-badge{display:flex;align-items:center;gap:5px;background:var(--fuzzy-bg);color:var(--fuzzy);padding:6px 12px;border-radius:var(--r-pill);font-size:13px;font-weight:600;border:1px solid var(--fuzzy-b)}
+.today-card{margin:16px 20px 0;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-dark) 100%);border-radius:var(--r-lg);padding:20px;color:#fff}
+.today-card-title{font-size:12px;font-weight:600;opacity:.8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+.today-stats-row{display:flex;gap:24px;margin-bottom:18px}
+.today-stat{display:flex;flex-direction:column}
+.today-stat-num{font-size:28px;font-weight:700;line-height:1}
+.today-stat-label{font-size:12px;opacity:.75;margin-top:2px}
+.btn-start{background:rgba(255,255,255,0.2);color:#fff;border:1.5px solid rgba(255,255,255,0.3);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.btn-start:active{background:rgba(255,255,255,0.3)}
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px}
+.overview-item{background:var(--card);border-radius:var(--r-md);padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px}
+.overview-num{font-size:26px;font-weight:700;color:var(--text-1)}
+.overview-label{font-size:12px;color:var(--text-3);font-weight:500}
+.overview-dot{width:6px;height:6px;border-radius:50%;margin-bottom:4px}
+.dot-total{background:var(--accent)}
+.dot-known{background:var(--known)}
+.dot-fuzzy{background:var(--fuzzy)}
+.dot-unknown{background:var(--unknown)}
+.recent-section{padding:0 20px 8px}
+.recent-item{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:12px;cursor:pointer}
+.recent-item:last-child{border-bottom:none}
+.recent-word{font-size:15px;font-weight:600;color:var(--text-1)}
+.recent-zh{font-size:13px;color:var(--text-3);margin-top:1px}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;text-align:center;gap:12px}
+.empty-icon{font-size:48px;opacity:.4}
+.empty-title{font-size:17px;font-weight:600;color:var(--text-2)}
+.empty-desc{font-size:14px;color:var(--text-3);line-height:1.6}
+
+/* ===== LEARN PAGE ===== */
+.learn-top{background:var(--card);border-bottom:1px solid var(--border);padding:calc(var(--safe-top) + 10px) 16px 0;position:sticky;top:0;z-index:10}
+.learn-nav{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.learn-progress-text{flex:1;text-align:center;font-size:14px;font-weight:600;color:var(--text-2)}
+.learn-star{font-size:22px;color:var(--text-3);padding:4px}
+.learn-star.starred{color:#F5A623}
+.progress-track{height:3px;background:var(--border);border-radius:2px;margin-bottom:0}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s ease}
+.learn-card{background:var(--card);margin:16px;border-radius:var(--r-lg);box-shadow:var(--shadow-md);overflow:hidden}
+.word-hero{padding:28px 24px 20px;text-align:center;background:linear-gradient(180deg,var(--accent-pale) 0%,var(--card) 100%)}
+.word-text{font-size:38px;font-weight:800;color:var(--text-1);letter-spacing:-1px;line-height:1.1;word-break:break-word}
+.word-phonetic{font-size:16px;color:var(--text-3);margin-top:8px;font-style:italic}
+.word-audio-row{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.btn-audio{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--r-pill);background:var(--accent-pale);color:var(--accent);font-size:12px;font-weight:600}
+.word-body{padding:0 24px 20px}
+.word-section{padding:14px 0;border-bottom:1px solid var(--border)}
+.word-section:last-child{border-bottom:none}
+.word-section-label{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.word-zh{font-size:20px;font-weight:700;color:var(--text-1);line-height:1.3}
+.word-en{font-size:14px;color:var(--text-2);line-height:1.6}
+.word-example{font-size:14px;color:var(--text-2);line-height:1.7;font-style:italic}
+.word-example-zh{font-size:13px;color:var(--text-3);margin-top:4px;line-height:1.5}
+.word-meta-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.source-chip-sm{display:inline-flex;padding:3px 10px;border-radius:var(--r-pill);font-size:11px;font-weight:600;background:var(--accent-pale);color:var(--accent)}
+.learn-actions{position:fixed;bottom:0;left:0;right:0;padding:12px 16px calc(12px + var(--safe-bot));background:var(--card);border-top:1px solid var(--border);display:flex;gap:10px;z-index:50}
+.btn-unknown{flex:1;background:var(--unknown-bg);color:var(--unknown);border:1.5px solid var(--unknown-b);padding:14px 8px;border-radius:var(--r-md);font-weight:700;font-size:15px}
+.btn-fuzzy{flex:1;background:var(--fuzzy-bg);color:var(--fuzzy);border:1.5px solid var(--fuzzy-b);padding:14px 8px;border-radius:var(--r-md);font-weight:700;font-size:15px}
+.btn-known{flex:1;background:var(--known-bg);color:var(--known);border:1.5px solid var(--known-b);padding:14px 8px;border-radius:var(--r-md);font-weight:700;font-size:15px}
+.btn-unknown:active{background:var(--unknown);color:#fff;transform:scale(0.97)}
+.btn-fuzzy:active{background:var(--fuzzy);color:#fff;transform:scale(0.97)}
+.btn-known:active{background:var(--known);color:#fff;transform:scale(0.97)}
+.learn-complete{display:none;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;text-align:center;gap:16px;min-height:60vh}
+.complete-icon{font-size:64px}
+.complete-title{font-size:24px;font-weight:800;color:var(--text-1)}
+.complete-sub{font-size:15px;color:var(--text-3);line-height:1.6}
+.complete-stats{display:flex;gap:32px;background:var(--card);border-radius:var(--r-lg);padding:20px 32px;box-shadow:var(--shadow)}
+.complete-stat{text-align:center}
+.complete-stat-num{font-size:28px;font-weight:800;color:var(--accent)}
+.complete-stat-label{font-size:12px;color:var(--text-3);margin-top:2px}
+
+/* ===== ADD PAGE ===== */
+.add-scroll{flex:1;overflow-y:auto;padding:16px 20px 100px}
+
+/* ===== LIBRARY PAGE ===== */
+.library-search-wrap{padding:12px 20px;background:var(--card);border-bottom:1px solid var(--border)}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:var(--r-pill);padding:8px 14px;border:1.5px solid var(--border)}
+.search-box input{flex:1;font-size:15px;color:var(--text-1)}
+.search-box input::placeholder{color:var(--text-3)}
+.library-filters{padding:10px 20px;background:var(--card);border-bottom:1px solid var(--border)}
+.word-list{padding:0 20px}
+.word-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.word-item:last-child{border-bottom:none}
+.word-item:active{opacity:.7}
+.word-status-bar{width:3px;height:36px;border-radius:2px;flex-shrink:0}
+.status-known{background:var(--known)}
+.status-fuzzy{background:var(--fuzzy)}
+.status-unknown{background:var(--unknown)}
+.word-item-body{flex:1;min-width:0}
+.word-item-en{font-size:16px;font-weight:700;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.word-item-zh{font-size:13px;color:var(--text-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.word-item-meta{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.word-item-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.word-item-date{font-size:11px;color:var(--text-3)}
+.word-item-star{font-size:16px;color:var(--text-3)}
+.word-item-star.on{color:#F5A623}
+
+/* ===== STATS PAGE ===== */
+.stats-scroll{flex:1;overflow-y:auto;padding:16px 20px 20px}
+.stats-top{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stats-card{background:var(--card);border-radius:var(--r-md);padding:16px;box-shadow:var(--shadow)}
+.stats-card-num{font-size:28px;font-weight:800;color:var(--text-1)}
+.stats-card-label{font-size:12px;color:var(--text-3);margin-top:2px}
+.stats-section{background:var(--card);border-radius:var(--r-md);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.stats-section-title{font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:14px}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:80px}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;background:var(--accent-pale);border-top:2px solid var(--accent);min-height:4px;transition:height .3s}
+.chart-bar-label{font-size:10px;color:var(--text-3);margin-top:2px}
+.chart-bar-val{font-size:10px;color:var(--text-2);font-weight:600}
+.dist-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)}
+.dist-row:last-child{border-bottom:none}
+.dist-label{font-size:13px;color:var(--text-2);width:80px;flex-shrink:0}
+.dist-bar-track{flex:1;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden}
+.dist-bar-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s}
+.dist-count{font-size:12px;color:var(--text-3);width:28px;text-align:right;flex-shrink:0}
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.progress-label{font-size:13px;color:var(--text-2);width:56px;flex-shrink:0}
+.progress-track2{flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden}
+.progress-fill2{height:100%;border-radius:4px;transition:width .4s}
+.fill-known{background:var(--known)}
+.fill-fuzzy{background:var(--fuzzy)}
+.fill-unknown{background:var(--unknown)}
+.progress-pct{font-size:12px;color:var(--text-3);width:36px;text-align:right;flex-shrink:0}
+
+/* ===== SETTINGS PAGE ===== */
+.settings-scroll{flex:1;overflow-y:auto;padding:16px 20px 20px}
+.settings-group{background:var(--card);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px}
+.settings-group-label{font-size:12px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;padding:14px 16px 6px}
+.settings-item{display:flex;align-items:center;padding:13px 16px;border-top:1px solid var(--border);gap:12px;cursor:pointer}
+.settings-item:first-of-type{border-top:none}
+.settings-item:active{background:var(--bg)}
+.settings-item-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.settings-item-body{flex:1}
+.settings-item-title{font-size:15px;color:var(--text-1);font-weight:500}
+.settings-item-sub{font-size:12px;color:var(--text-3);margin-top:1px}
+.settings-item-right{display:flex;align-items:center;gap:8px;color:var(--text-3)}
+.settings-item-right svg{width:16px;height:16px}
+.toggle-wrap{position:relative;width:44px;height:26px}
+.toggle-input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;background:var(--border);border-radius:13px;transition:background .2s;cursor:pointer}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.2);transition:transform .2s}
+.toggle-input:checked+.toggle-track{background:var(--accent)}
+.toggle-input:checked~.toggle-thumb{transform:translateX(18px)}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper-val{font-size:15px;font-weight:600;color:var(--text-1);width:28px;text-align:center}
+.stepper-btn{width:28px;height:28px;border-radius:50%;background:var(--accent-pale);color:var(--accent);font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.stepper-btn:active{background:var(--accent-light)}
+.danger-item .settings-item-title{color:var(--unknown)}
+
+/* ===== WORD DETAIL PAGE ===== */
+.detail-scroll{flex:1;overflow-y:auto;padding:16px 20px 32px}
+.detail-word{font-size:34px;font-weight:800;color:var(--text-1);letter-spacing:-0.5px;margin-bottom:4px}
+.detail-phonetic{font-size:15px;color:var(--text-3);font-style:italic;margin-bottom:12px}
+.detail-card{background:var(--card);border-radius:var(--r-md);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.detail-section-label{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.detail-zh{font-size:19px;font-weight:700;color:var(--text-1);line-height:1.3}
+.detail-en{font-size:14px;color:var(--text-2);line-height:1.7;margin-top:8px}
+.detail-example{font-size:14px;color:var(--text-2);font-style:italic;line-height:1.7}
+.detail-example-zh{font-size:13px;color:var(--text-3);margin-top:4px}
+.detail-notes{font-size:14px;color:var(--text-2);line-height:1.6}
+.detail-actions{display:flex;gap:10px;padding:0 20px 16px}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:none;align-items:flex-end;padding-bottom:var(--safe-bot);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:var(--card);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:24px 20px calc(16px + var(--safe-bot));width:100%;max-width:480px;margin:0 auto}
+.modal-title{font-size:17px;font-weight:700;color:var(--text-1);margin-bottom:8px}
+.modal-desc{font-size:14px;color:var(--text-3);margin-bottom:20px;line-height:1.5}
+.modal-actions{display:flex;gap:10px}
+
+/* ===== TOAST ===== */
+#toast{position:fixed;top:calc(var(--safe-top) + 16px);left:50%;transform:translateX(-50%) translateY(-80px);background:var(--text-1);color:#fff;padding:10px 20px;border-radius:var(--r-pill);font-size:14px;font-weight:500;z-index:300;transition:transform .3s;pointer-events:none;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.page.active .page-content>*,.page.active .stats-scroll>*,.page.active .add-scroll>*,.page.active .settings-scroll>*,.page.active .detail-scroll>*{animation:fadeSlideUp .25s ease both}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ========== HOME PAGE ========== -->
+<div class="page active" id="page-home">
+  <div class="home-top">
+    <div class="home-header">
+      <div>
+        <div class="home-greeting" id="home-greeting">早上好</div>
+        <div class="home-date" id="home-date"></div>
+      </div>
+      <div class="streak-badge" id="home-streak">🔥 0 天</div>
+    </div>
+  </div>
+  <div class="today-card" id="today-card">
+    <div class="today-card-title">今日学习计划</div>
+    <div class="today-stats-row">
+      <div class="today-stat">
+        <div class="today-stat-num" id="today-new-count">0</div>
+        <div class="today-stat-label">新词</div>
+      </div>
+      <div class="today-stat">
+        <div class="today-stat-num" id="today-review-count">0</div>
+        <div class="today-stat-label">复习</div>
+      </div>
+    </div>
+    <button class="btn btn-start btn-full" onclick="startLearn()">开始学习</button>
+  </div>
+  <div class="overview-grid">
+    <div class="overview-item">
+      <div class="overview-dot dot-total"></div>
+      <div class="overview-num" id="stat-total">0</div>
+      <div class="overview-label">总词汇</div>
+    </div>
+    <div class="overview-item">
+      <div class="overview-dot dot-known"></div>
+      <div class="overview-num" id="stat-known">0</div>
+      <div class="overview-label">已掌握</div>
+    </div>
+    <div class="overview-item">
+      <div class="overview-dot dot-fuzzy"></div>
+      <div class="overview-num" id="stat-fuzzy">0</div>
+      <div class="overview-label">模糊</div>
+    </div>
+    <div class="overview-item">
+      <div class="overview-dot dot-unknown"></div>
+      <div class="overview-num" id="stat-unknown">0</div>
+      <div class="overview-label">不认识</div>
+    </div>
+  </div>
+  <div class="recent-section" id="recent-section">
+    <div class="section-label">最近添加</div>
+    <div id="recent-list"></div>
+  </div>
+  <!-- Settings entry -->
+  <div style="padding:0 20px 8px;display:flex;justify-content:flex-end">
+    <button class="btn btn-secondary btn-sm" onclick="navigate('settings')">⚙ 设置</button>
+  </div>
+</div>
+
+<!-- ========== LEARN PAGE ========== -->
+<div class="page page-nofooter" id="page-learn">
+  <div class="learn-top">
+    <div class="learn-nav">
+      <button class="btn-icon" onclick="navigate('home')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
+      <div class="learn-progress-text" id="learn-progress">0 / 0</div>
+      <button class="btn-icon learn-star" id="learn-star" onclick="learnToggleStar()">☆</button>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="learn-progress-bar" style="width:0%"></div></div>
+  </div>
+
+  <!-- Complete screen -->
+  <div class="learn-complete" id="learn-complete">
+    <div class="complete-icon">🎉</div>
+    <div class="complete-title">今日完成！</div>
+    <div class="complete-sub">继续坚持，词汇量越来越丰富</div>
+    <div class="complete-stats">
+      <div class="complete-stat">
+        <div class="complete-stat-num" id="complete-new">0</div>
+        <div class="complete-stat-label">新词</div>
+      </div>
+      <div class="complete-stat">
+        <div class="complete-stat-num" id="complete-review">0</div>
+        <div class="complete-stat-label">复习</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="navigate('home')">返回首页</button>
+  </div>
+
+  <!-- Card -->
+  <div id="learn-card-container" style="flex:1;overflow-y:auto;padding-bottom:96px">
+    <div class="learn-card" id="learn-card">
+      <div class="word-hero">
+        <div class="word-text" id="learn-word">word</div>
+        <div class="word-phonetic" id="learn-phonetic"></div>
+        <div class="word-audio-row">
+          <button class="btn-audio" onclick="speakWord('us')">🔊 美音</button>
+          <button class="btn-audio" onclick="speakWord('uk')">🔊 英音</button>
+        </div>
+      </div>
+      <div class="word-body">
+        <div class="word-section">
+          <div class="word-section-label">中文释义</div>
+          <div class="word-zh" id="learn-zh"></div>
+        </div>
+        <div class="word-section learn-section" id="learn-en-section">
+          <div class="word-section-label">English</div>
+          <div class="word-en" id="learn-en"></div>
+        </div>
+        <div class="word-section" id="learn-example-section">
+          <div class="word-section-label">例句</div>
+          <div class="word-example" id="learn-example"></div>
+          <div class="word-example-zh" id="learn-example-zh"></div>
+        </div>
+        <div class="word-section">
+          <div class="word-meta-row" id="learn-tags"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="learn-actions" id="learn-actions">
+    <button class="btn-unknown" onclick="learnAnswer('unknown')">✗ 不认识</button>
+    <button class="btn-fuzzy" onclick="learnAnswer('fuzzy')">~ 模糊</button>
+    <button class="btn-known" onclick="learnAnswer('known')">✓ 认识</button>
+  </div>
+</div>
+
+<!-- ========== ADD PAGE ========== -->
+<div class="page page-nofooter" id="page-add">
+  <div class="page-header">
+    <button class="btn-icon" onclick="navigate('library')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="page-title" id="add-title">添加单词</div>
+    <button class="btn btn-primary btn-sm" onclick="addSave()" id="add-save-btn">保存</button>
+  </div>
+  <div class="add-scroll">
+    <div class="form-card">
+      <div class="form-card-title">单词</div>
+      <div class="form-row" style="border-top:none">
+        <div class="form-label">英文单词 *</div>
+        <input class="form-input" id="input-word" placeholder="例如：autopilot" autocapitalize="none" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="form-row">
+        <div class="form-label">音标</div>
+        <input class="form-input" id="input-phonetic" placeholder="/ˈɔːtəʊˌpaɪlət/">
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">释义</div>
+      <div class="form-row" style="border-top:none">
+        <div class="form-label">中文释义 *</div>
+        <textarea class="form-textarea" id="input-zh" placeholder="全自动执行任务，从想法到代码一步完成"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-label">English Definition</div>
+        <textarea class="form-textarea" id="input-en" placeholder="A system that automatically controls..."></textarea>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">例句</div>
+      <div class="form-row" style="border-top:none">
+        <div class="form-label">例句</div>
+        <textarea class="form-textarea" id="input-example" placeholder="Run /autopilot to handle the full lifecycle."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-label">例句翻译</div>
+        <textarea class="form-textarea" id="input-example-zh" placeholder="运行 /autopilot 自动处理完整开发流程。"></textarea>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">分类</div>
+      <div class="form-row" style="border-top:none">
+        <div class="form-label">来源</div>
+        <div class="chips-row" id="source-chips" style="margin-top:6px"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">标签</div>
+        <div class="chips-row" id="preset-tag-chips" style="margin-top:6px"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input class="form-input" id="custom-tag-input" placeholder="自定义标签" style="border:1.5px solid var(--border);border-radius:var(--r-pill);padding:6px 12px;flex:1;font-size:13px">
+          <button class="btn btn-secondary btn-sm" onclick="addCustomTag()">添加</button>
+        </div>
+        <div id="custom-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">备注</div>
+        <textarea class="form-textarea" id="input-notes" placeholder="个人笔记..."></textarea>
+      </div>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+<!-- ========== LIBRARY PAGE ========== -->
+<div class="page" id="page-library">
+  <div class="library-search-wrap">
+    <div class="search-box">
+      <svg class="icon" style="width:16px;height:16px;color:var(--text-3)" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="library-search" placeholder="搜索单词、释义…" oninput="libraryFilter()" autocapitalize="none" autocorrect="off" spellcheck="false">
+    </div>
+  </div>
+  <div class="library-filters">
+    <div class="chips-row" id="library-filter-chips"></div>
+  </div>
+  <div id="library-list" class="word-list"></div>
+</div>
+
+<!-- ========== STATS PAGE ========== -->
+<div class="page" id="page-stats">
+  <div class="page-header"><div class="page-title">统计</div></div>
+  <div class="stats-scroll" id="stats-scroll">
+    <div class="stats-top" id="stats-top"></div>
+    <div class="stats-section">
+      <div class="stats-section-title">词汇掌握进度</div>
+      <div id="stats-progress"></div>
+    </div>
+    <div class="stats-section">
+      <div class="stats-section-title">最近 7 天学习</div>
+      <div class="chart-bars" id="stats-chart"></div>
+    </div>
+    <div class="stats-section">
+      <div class="stats-section-title">来源分布</div>
+      <div id="stats-source"></div>
+    </div>
+    <div class="stats-section">
+      <div class="stats-section-title">标签分布</div>
+      <div id="stats-tags"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SETTINGS PAGE ========== -->
+<div class="page" id="page-settings">
+  <div class="page-header">
+    <button class="btn-icon" onclick="navigate('home')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="page-title">设置</div>
+  </div>
+  <div class="settings-scroll">
+    <div class="settings-group">
+      <div class="settings-group-label">数据管理</div>
+      <div class="settings-item" onclick="settingsExport()">
+        <div class="settings-item-icon" style="background:#EBF3FA">📤</div>
+        <div class="settings-item-body"><div class="settings-item-title">导出词库</div><div class="settings-item-sub">保存为 JSON 文件</div></div>
+        <div class="settings-item-right"><svg class="icon" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+      <div class="settings-item" onclick="document.getElementById('import-file').click()">
+        <div class="settings-item-icon" style="background:#E8F5EF">📥</div>
+        <div class="settings-item-body"><div class="settings-item-title">导入词库</div><div class="settings-item-sub">从 JSON 文件恢复</div></div>
+        <div class="settings-item-right"><svg class="icon" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="settingsImport(event)">
+      <div class="settings-item danger-item" onclick="confirmClear()">
+        <div class="settings-item-icon" style="background:#FDEEEC">🗑</div>
+        <div class="settings-item-body"><div class="settings-item-title">清空全部数据</div><div class="settings-item-sub">此操作不可撤销</div></div>
+        <div class="settings-item-right"><svg class="icon" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-label">学习设置</div>
+      <div class="settings-item" style="cursor:default">
+        <div class="settings-item-icon" style="background:#EBF3FA">📖</div>
+        <div class="settings-item-body"><div class="settings-item-title">每日新词</div></div>
+        <div class="stepper">
+          <button class="stepper-btn" onclick="stepperChange('dailyNew',-1)">−</button>
+          <div class="stepper-val" id="setting-dailyNew">10</div>
+          <button class="stepper-btn" onclick="stepperChange('dailyNew',1)">+</button>
+        </div>
+      </div>
+      <div class="settings-item" style="cursor:default">
+        <div class="settings-item-icon" style="background:#EBF3FA">🔁</div>
+        <div class="settings-item-body"><div class="settings-item-title">每日复习</div></div>
+        <div class="stepper">
+          <button class="stepper-btn" onclick="stepperChange('dailyReview',-1)">−</button>
+          <div class="stepper-val" id="setting-dailyReview">20</div>
+          <button class="stepper-btn" onclick="stepperChange('dailyReview',1)">+</button>
+        </div>
+      </div>
+      <div class="settings-item" style="cursor:default">
+        <div class="settings-item-icon" style="background:#EBF3FA">🇺🇸</div>
+        <div class="settings-item-body"><div class="settings-item-title">显示英文释义</div></div>
+        <label class="toggle-wrap">
+          <input type="checkbox" class="toggle-input" id="toggle-en" onchange="toggleSetting('showEnMeaning')">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+      <div class="settings-item" style="cursor:default">
+        <div class="settings-item-icon" style="background:#EBF3FA">💬</div>
+        <div class="settings-item-body"><div class="settings-item-title">显示例句</div></div>
+        <label class="toggle-wrap">
+          <input type="checkbox" class="toggle-input" id="toggle-example" onchange="toggleSetting('showExample')">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-label">关于</div>
+      <div class="settings-item" style="cursor:default">
+        <div class="settings-item-icon" style="background:#EBF3FA">📱</div>
+        <div class="settings-item-body"><div class="settings-item-title">离线使用</div><div class="settings-item-sub">数据仅保存在本设备，无需网络</div></div>
+      </div>
+      <div class="settings-item" style="cursor:default">
+        <div class="settings-item-icon" style="background:#EBF3FA">ℹ️</div>
+        <div class="settings-item-body"><div class="settings-item-title">版本</div></div>
+        <div class="settings-item-right" style="color:var(--text-3);font-size:14px">v1.0.0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== WORD DETAIL PAGE ========== -->
+<div class="page" id="page-detail">
+  <div class="page-header">
+    <button class="btn-icon" onclick="history.back(), navigate(App.prevPage||'library')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="page-title" id="detail-page-title">单词详情</div>
+    <button class="btn-icon" id="detail-star" onclick="detailToggleStar()">☆</button>
+  </div>
+  <div class="detail-scroll">
+    <div class="detail-word" id="detail-word"></div>
+    <div class="detail-phonetic" id="detail-phonetic"></div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="btn-audio" onclick="speakDetailWord('us')">🔊 美音</button>
+      <button class="btn-audio" onclick="speakDetailWord('uk')">🔊 英音</button>
+      <div id="detail-status-chip" style="margin-left:auto"></div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-section-label">中文释义</div>
+      <div class="detail-zh" id="detail-zh"></div>
+      <div class="detail-en" id="detail-en"></div>
+    </div>
+    <div class="detail-card" id="detail-example-card">
+      <div class="detail-section-label">例句</div>
+      <div class="detail-example" id="detail-example"></div>
+      <div class="detail-example-zh" id="detail-example-zh"></div>
+    </div>
+    <div class="detail-card" id="detail-meta-card">
+      <div style="display:flex;flex-wrap:wrap;gap:8px" id="detail-meta"></div>
+    </div>
+    <div class="detail-card" id="detail-notes-card" style="display:none">
+      <div class="detail-section-label">备注</div>
+      <div class="detail-notes" id="detail-notes"></div>
+    </div>
+  </div>
+  <div class="detail-actions">
+    <button class="btn btn-secondary btn-full" onclick="detailEdit()">✏ 编辑</button>
+    <button class="btn btn-danger btn-sm" onclick="detailDelete()">删除</button>
+  </div>
+</div>
+
+<!-- ========== BOTTOM NAV ========== -->
+<nav id="bottom-nav">
+  <div class="nav-item active" data-page="home" onclick="navigate('home')">
+    <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    首页
+  </div>
+  <div class="nav-item" data-page="learn" onclick="startLearn()">
+    <svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+    学习
+  </div>
+  <div class="nav-item" data-page="add" onclick="navigate('add')">
+    <svg class="icon" viewBox="0 0 24 24" style="width:26px;height:26px"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+    添加
+  </div>
+  <div class="nav-item" data-page="library" onclick="navigate('library')">
+    <svg class="icon" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    词库
+  </div>
+  <div class="nav-item" data-page="stats" onclick="navigate('stats')">
+    <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    统计
+  </div>
+</nav>
+
+<!-- ========== CONFIRM MODAL ========== -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal-sheet">
+    <div class="modal-title" id="modal-title">确认操作</div>
+    <div class="modal-desc" id="modal-desc"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-full" onclick="modalClose()">取消</button>
+      <button class="btn btn-danger btn-full" id="modal-ok-btn">确认</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const SOURCES = ['Claude','ChatGPT','GitHub','Linux','Docker','VPN','投标文件','技术文档','其他'];
+const PRESET_TAGS = ['AI','Linux','Docker','VPN','投标','开发','网络','系统','命令行'];
+const FILTERS = [
+  {id:'all',label:'全部'},
+  {id:'known',label:'已掌握'},
+  {id:'fuzzy',label:'模糊'},
+  {id:'unknown',label:'不认识'},
+  {id:'today',label:'今日新增'},
+  {id:'due',label:'待复习'},
+  {id:'starred',label:'收藏'}
+];
+const STATUS_LABEL = {known:'已掌握',fuzzy:'模糊',unknown:'不认识'};
+const STATUS_CLASS = {known:'chip-known',fuzzy:'chip-fuzzy',unknown:'chip-unknown'};
+const INTERVALS = [3,7,14,30,90]; // days for 'known'
+const DAY = 86400000;
+
+// ============================================================
+// DB
+// ============================================================
+const DB = {
+  words:{
+    get:()=>JSON.parse(localStorage.getItem('tw_words')||'[]'),
+    set:(d)=>localStorage.setItem('tw_words',JSON.stringify(d)),
+    add(w){const a=this.get();a.unshift(w);this.set(a)},
+    update(id,u){const a=this.get(),i=a.findIndex(w=>w.id===id);if(i>-1){a[i]={...a[i],...u};this.set(a)}},
+    remove(id){this.set(this.get().filter(w=>w.id!==id))}
+  },
+  settings:{
+    get:()=>({dailyNew:10,dailyReview:20,showEnMeaning:true,showExample:true,...JSON.parse(localStorage.getItem('tw_settings')||'{}')}),
+    set:(d)=>localStorage.setItem('tw_settings',JSON.stringify(d)),
+    update(u){this.set({...this.get(),...u})}
+  },
+  stats:{
+    get:()=>({streak:0,totalDays:0,lastStudyDate:null,history:[],...JSON.parse(localStorage.getItem('tw_stats')||'{}')}),
+    set:(d)=>localStorage.setItem('tw_stats',JSON.stringify(d))
+  }
+};
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function today(){return new Date().toISOString().slice(0,10)}
+function greeting(){const h=new Date().getHours();return h<6?'深夜好':h<12?'早上好':h<14?'中午好':h<18?'下午好':'晚上好'}
+function weekday(){return['周日','周一','周二','周三','周四','周五','周六'][new Date().getDay()]}
+function fmtDate(ts){if(!ts)return'';const d=new Date(ts);return`${d.getMonth()+1}/${d.getDate()}`}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function qs(sel,root=document){return root.querySelector(sel)}
+function qsa(sel,root=document){return [...root.querySelectorAll(sel)]}
+
+function calcNextReview(word,answer){
+  const now=Date.now();
+  if(answer==='unknown') return{status:'unknown',nextReview:now+DAY*0.25,reviewCount:0};
+  if(answer==='fuzzy') return{status:'fuzzy',nextReview:now+DAY,reviewCount:Math.max(0,(word.reviewCount||0)-1)};
+  const rc=(word.reviewCount||0);
+  const idx=Math.min(rc,INTERVALS.length-1);
+  return{status:'known',nextReview:now+DAY*INTERVALS[idx],reviewCount:rc+1};
+}
+
+// ============================================================
+// ROUTER / NAVIGATION
+// ============================================================
+const App={currentPage:'home',prevPage:'home',learnQueue:[],learnIdx:0,learnStats:{n:0,r:0},currentFilter:'all',currentDetailId:null,addEditId:null,addSelectedSource:'',addSelectedTags:[]};
+
+function navigate(page,params={}){
+  qsa('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('page-'+page);
+  if(!el)return;
+  el.classList.add('active');
+  App.prevPage=App.currentPage;
+  App.currentPage=page;
+  // Nav highlight
+  qsa('.nav-item').forEach(item=>item.classList.toggle('active',item.dataset.page===page));
+  // Show/hide bottom nav
+  const nav=document.getElementById('bottom-nav');
+  nav.style.display=['learn','add','settings','detail'].includes(page)?'none':'flex';
+  // Page init
+  const inits={home:homeRender,library:libraryRender,stats:statsRender,settings:settingsRender,learn:learnInit,add:()=>addInit(params)};
+  inits[page]?.();
+}
+
+// ============================================================
+// HOME
+// ============================================================
+function homeRender(){
+  const words=DB.words.get(),settings=DB.settings.get(),stats=DB.stats.get();
+  const now=Date.now(),todayStr=today();
+  qs('#home-greeting').textContent=greeting();
+  const d=new Date();
+  qs('#home-date').textContent=`${d.getMonth()+1}月${d.getDate()}日 ${weekday()}`;
+  // streak
+  let streak=stats.streak||0;
+  if(stats.lastStudyDate&&stats.lastStudyDate!==todayStr){
+    const prev=new Date(todayStr);prev.setDate(prev.getDate()-1);
+    if(stats.lastStudyDate!==prev.toISOString().slice(0,10))streak=0;
+  }
+  qs('#home-streak').textContent=`🔥 ${streak} 天`;
+  // today counts
+  const newWords=words.filter(w=>w.reviewCount===0&&w.status==='unknown').slice(0,settings.dailyNew);
+  const reviewWords=words.filter(w=>w.reviewCount>0&&w.nextReview<=now);
+  qs('#today-new-count').textContent=newWords.length;
+  qs('#today-review-count').textContent=Math.min(reviewWords.length,settings.dailyReview);
+  // overview
+  qs('#stat-total').textContent=words.length;
+  qs('#stat-known').textContent=words.filter(w=>w.status==='known').length;
+  qs('#stat-fuzzy').textContent=words.filter(w=>w.status==='fuzzy').length;
+  qs('#stat-unknown').textContent=words.filter(w=>w.status==='unknown').length;
+  // recent
+  const recentEl=qs('#recent-list');
+  const recent=words.slice(0,5);
+  if(recent.length===0){
+    recentEl.innerHTML=`<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-title">词库还是空的</div><div class="empty-desc">在 Claude、GitHub 遇到不认识的单词时，点击底部"+"快速添加</div></div>`;
+  }else{
+    recentEl.innerHTML=recent.map(w=>`
+      <div class="recent-item" onclick="openDetail('${w.id}','home')">
+        <div style="flex:1">
+          <div class="recent-word">${w.word}</div>
+          <div class="recent-zh">${w.zhMeaning||''}</div>
+        </div>
+        <span class="chip ${STATUS_CLASS[w.status]||''}" style="font-size:11px;padding:3px 8px">${STATUS_LABEL[w.status]||''}</span>
+      </div>`).join('');
+  }
+}
+
+function startLearn(){navigate('learn')}
+
+// ============================================================
+// LEARN
+// ============================================================
+function learnInit(){
+  const words=DB.words.get(),settings=DB.settings.get(),now=Date.now();
+  const newW=words.filter(w=>w.reviewCount===0&&w.status==='unknown').slice(0,settings.dailyNew);
+  const revW=words.filter(w=>w.reviewCount>0&&w.nextReview<=now).sort((a,b)=>a.nextReview-b.nextReview).slice(0,settings.dailyReview);
+  App.learnQueue=[...newW,...revW].sort(()=>Math.random()-.5);
+  App.learnIdx=0;App.learnStats={n:0,r:0};
+  qs('#learn-complete').style.display='none';
+  qs('#learn-card-container').style.display='block';
+  qs('#learn-actions').style.display='flex';
+  learnShow();
+}
+
+function learnShow(){
+  const q=App.learnQueue,i=App.learnIdx,total=q.length;
+  if(total===0||i>=total){learnComplete();return}
+  const w=q[i],settings=DB.settings.get();
+  qs('#learn-progress').textContent=`${i+1} / ${total}`;
+  qs('#learn-progress-bar').style.width=`${((i+1)/total)*100}%`;
+  qs('#learn-word').textContent=w.word;
+  qs('#learn-phonetic').textContent=w.phonetic||'';
+  qs('#learn-zh').textContent=w.zhMeaning||'';
+  const enSection=qs('#learn-en-section');
+  if(settings.showEnMeaning&&w.enMeaning){enSection.style.display='block';qs('#learn-en').textContent=w.enMeaning}else{enSection.style.display='none'}
+  const exSection=qs('#learn-example-section');
+  if(settings.showExample&&w.example){exSection.style.display='block';qs('#learn-example').textContent=w.example;qs('#learn-example-zh').textContent=w.exampleZh||''}else{exSection.style.display='none'}
+  const tagsEl=qs('#learn-tags');
+  const parts=[];
+  if(w.source)parts.push(`<span class="source-chip-sm">${w.source}</span>`);
+  (w.tags||[]).forEach(t=>parts.push(`<span class="tag">${t}</span>`));
+  tagsEl.innerHTML=parts.join('');
+  const star=qs('#learn-star');star.textContent=w.starred?'★':'☆';star.classList.toggle('starred',!!w.starred);
+  const card=qs('#learn-card');
+  card.style.opacity='0';card.style.transform='translateY(16px)';
+  requestAnimationFrame(()=>{card.style.transition='opacity .25s,transform .25s';card.style.opacity='1';card.style.transform='none';setTimeout(()=>card.style.transition='',300)});
+}
+
+function learnAnswer(ans){
+  const w=App.learnQueue[App.learnIdx];if(!w)return;
+  const upd=calcNextReview(w,ans);
+  DB.words.update(w.id,upd);
+  if(w.reviewCount===0)App.learnStats.n++;else App.learnStats.r++;
+  App.learnIdx++;
+  const card=qs('#learn-card');
+  const dx=ans==='known'?60:ans==='unknown'?-60:0;
+  card.style.transition='opacity .18s,transform .18s';
+  card.style.opacity='0';card.style.transform=`translateX(${dx}px)`;
+  setTimeout(()=>{card.style.transition='';card.style.transform='';learnShow()},180);
+}
+
+function learnToggleStar(){
+  const w=App.learnQueue[App.learnIdx];if(!w)return;
+  w.starred=!w.starred;DB.words.update(w.id,{starred:w.starred});
+  const star=qs('#learn-star');star.textContent=w.starred?'★':'☆';star.classList.toggle('starred',w.starred);
+}
+
+function learnComplete(){
+  qs('#learn-complete').style.display='flex';
+  qs('#learn-card-container').style.display='none';
+  qs('#learn-actions').style.display='none';
+  qs('#complete-new').textContent=App.learnStats.n;
+  qs('#complete-review').textContent=App.learnStats.r;
+  // Update stats
+  const stats=DB.stats.get(),todayStr=today();
+  const prev=new Date(todayStr);prev.setDate(prev.getDate()-1);
+  if(stats.lastStudyDate===prev.toISOString().slice(0,10))stats.streak=(stats.streak||0)+1;
+  else if(stats.lastStudyDate!==todayStr)stats.streak=1;
+  stats.lastStudyDate=todayStr;
+  const hist=stats.history||[];
+  const todayH=hist.find(h=>h.date===todayStr);
+  if(todayH){todayH.n=(todayH.n||0)+App.learnStats.n;todayH.r=(todayH.r||0)+App.learnStats.r}
+  else hist.push({date:todayStr,n:App.learnStats.n,r:App.learnStats.r});
+  stats.history=hist.slice(-60);
+  DB.stats.set(stats);
+}
+
+function speakWord(accent){
+  const word=qs('#learn-word').textContent;
+  if(!word)return;
+  const u=new SpeechSynthesisUtterance(word);
+  u.lang=accent==='uk'?'en-GB':'en-US';
+  speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+
+// ============================================================
+// ADD / EDIT
+// ============================================================
+function addInit(params={}){
+  const id=params.editId||null;
+  App.addEditId=id;App.addSelectedSource='';App.addSelectedTags=[];
+  // Build source chips
+  const sc=qs('#source-chips');
+  sc.innerHTML=SOURCES.map(s=>`<div class="chip" data-source="${s}" onclick="addSelectSource('${s}')">${s}</div>`).join('');
+  // Build preset tags
+  const tc=qs('#preset-tag-chips');
+  tc.innerHTML=PRESET_TAGS.map(t=>`<div class="chip" data-tag="${t}" onclick="addToggleTag('${t}')">${t}</div>`).join('');
+  if(id){
+    const w=DB.words.get().find(x=>x.id===id);
+    if(w){
+      App.addSelectedSource=w.source||'';App.addSelectedTags=[...(w.tags||[])];
+      qs('#input-word').value=w.word||'';qs('#input-phonetic').value=w.phonetic||'';
+      qs('#input-zh').value=w.zhMeaning||'';qs('#input-en').value=w.enMeaning||'';
+      qs('#input-example').value=w.example||'';qs('#input-example-zh').value=w.exampleZh||'';
+      qs('#input-notes').value=w.notes||'';
+    }
+    qs('#add-title').textContent='编辑单词';qs('#add-save-btn').textContent='保存';
+  }else{
+    ['input-word','input-phonetic','input-zh','input-en','input-example','input-example-zh','input-notes'].forEach(id=>qs('#'+id).value='');
+    qs('#add-title').textContent='添加单词';qs('#add-save-btn').textContent='保存';
+  }
+  addRefreshChips();
+  qs('#custom-tags').innerHTML='';
+}
+
+function addSelectSource(s){App.addSelectedSource=App.addSelectedSource===s?'':s;addRefreshChips()}
+function addToggleTag(t){const i=App.addSelectedTags.indexOf(t);if(i>-1)App.addSelectedTags.splice(i,1);else App.addSelectedTags.push(t);addRefreshChips()}
+function addCustomTag(){const inp=qs('#custom-tag-input'),t=inp.value.trim();if(t&&!App.addSelectedTags.includes(t)){App.addSelectedTags.push(t);inp.value='';addRefreshChips()}}
+function addRemoveTag(t){App.addSelectedTags=App.addSelectedTags.filter(x=>x!==t);addRefreshChips()}
+
+function addRefreshChips(){
+  qsa('.chip[data-source]').forEach(c=>c.classList.toggle('selected',c.dataset.source===App.addSelectedSource));
+  qsa('.chip[data-tag]').forEach(c=>c.classList.toggle('selected',App.addSelectedTags.includes(c.dataset.tag)));
+  qs('#custom-tags').innerHTML=App.addSelectedTags.filter(t=>!PRESET_TAGS.includes(t)).map(t=>`<span class="tag">${t} <button onclick="addRemoveTag('${t}')" style="background:none;border:none;color:inherit;cursor:pointer;margin-left:2px">×</button></span>`).join('');
+}
+
+function addSave(){
+  const word=qs('#input-word').value.trim(),zh=qs('#input-zh').value.trim();
+  if(!word){showToast('请输入英文单词');return}
+  if(!zh){showToast('请输入中文释义');return}
+  const data={word,phonetic:qs('#input-phonetic').value.trim(),zhMeaning:zh,enMeaning:qs('#input-en').value.trim(),example:qs('#input-example').value.trim(),exampleZh:qs('#input-example-zh').value.trim(),source:App.addSelectedSource,tags:[...App.addSelectedTags],notes:qs('#input-notes').value.trim()};
+  if(App.addEditId){DB.words.update(App.addEditId,data);showToast('已保存修改')}
+  else{DB.words.add({id:uid(),...data,status:'unknown',createdAt:Date.now(),nextReview:Date.now(),reviewCount:0,starred:false});showToast('添加成功')}
+  navigate('library');
+}
+
+// ============================================================
+// LIBRARY
+// ============================================================
+function libraryRender(){
+  // Build filter chips
+  const fc=qs('#library-filter-chips');
+  fc.innerHTML=FILTERS.map(f=>`<div class="chip${App.currentFilter===f.id?' active':''}" onclick="setFilter('${f.id}')">${f.label}</div>`).join('');
+  libraryList();
+}
+
+function setFilter(id){App.currentFilter=id;libraryRender()}
+function libraryFilter(){libraryList()}
+
+function libraryList(){
+  const words=DB.words.get(),q=(qs('#library-search').value||'').toLowerCase().trim(),now=Date.now(),todayStr=today();
+  let list=words;
+  // text filter
+  if(q)list=list.filter(w=>(w.word||'').toLowerCase().includes(q)||(w.zhMeaning||'').toLowerCase().includes(q)||(w.tags||[]).some(t=>t.toLowerCase().includes(q)));
+  // status filter
+  const f=App.currentFilter;
+  if(f==='known')list=list.filter(w=>w.status==='known');
+  else if(f==='fuzzy')list=list.filter(w=>w.status==='fuzzy');
+  else if(f==='unknown')list=list.filter(w=>w.status==='unknown');
+  else if(f==='today')list=list.filter(w=>new Date(w.createdAt).toISOString().slice(0,10)===todayStr);
+  else if(f==='due')list=list.filter(w=>w.nextReview<=now&&w.reviewCount>0);
+  else if(f==='starred')list=list.filter(w=>w.starred);
+  const el=qs('#library-list');
+  if(list.length===0){el.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">没有找到单词</div><div class="empty-desc">换个关键词试试，或添加新单词</div></div>`;return}
+  el.innerHTML=list.map(w=>`
+    <div class="word-item" onclick="openDetail('${w.id}','library')">
+      <div class="word-status-bar status-${w.status}"></div>
+      <div class="word-item-body">
+        <div class="word-item-en">${w.word}</div>
+        <div class="word-item-zh">${w.zhMeaning||''}</div>
+        ${(w.tags||[]).length>0?`<div class="word-item-meta">${w.tags.slice(0,3).map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:''}
+      </div>
+      <div class="word-item-right">
+        <span class="chip ${STATUS_CLASS[w.status]||''}" style="font-size:10px;padding:2px 8px">${STATUS_LABEL[w.status]||''}</span>
+        <div class="word-item-date">${w.nextReview&&w.reviewCount>0?fmtDate(w.nextReview):'新词'}</div>
+        <div class="word-item-star ${w.starred?'on':''}">${w.starred?'★':'☆'}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// WORD DETAIL
+// ============================================================
+function openDetail(id,from){
+  App.currentDetailId=id;App.prevPage=from||'library';
+  const w=DB.words.get().find(x=>x.id===id);if(!w)return;
+  qs('#detail-word').textContent=w.word;
+  qs('#detail-phonetic').textContent=w.phonetic||'';
+  qs('#detail-zh').textContent=w.zhMeaning||'';
+  qs('#detail-en').textContent=w.enMeaning||'';
+  qs('#detail-en').style.display=w.enMeaning?'block':'none';
+  const exCard=qs('#detail-example-card');
+  if(w.example){exCard.style.display='block';qs('#detail-example').textContent=w.example;qs('#detail-example-zh').textContent=w.exampleZh||''}else{exCard.style.display='none'}
+  const notesCard=qs('#detail-notes-card');
+  if(w.notes){notesCard.style.display='block';qs('#detail-notes').textContent=w.notes}else{notesCard.style.display='none'}
+  // status + source + tags
+  const meta=[];
+  if(w.source)meta.push(`<span class="source-chip-sm">${w.source}</span>`);
+  meta.push(`<span class="chip ${STATUS_CLASS[w.status]||''}" style="font-size:11px;padding:3px 10px">${STATUS_LABEL[w.status]||''}</span>`);
+  (w.tags||[]).forEach(t=>meta.push(`<span class="tag">${t}</span>`));
+  qs('#detail-meta').innerHTML=meta.join('');
+  const star=qs('#detail-star');star.textContent=w.starred?'★':'☆';star.classList.toggle('starred',!!w.starred);
+  navigate('detail');
+}
+
+function detailToggleStar(){
+  const w=DB.words.get().find(x=>x.id===App.currentDetailId);if(!w)return;
+  const starred=!w.starred;DB.words.update(App.currentDetailId,{starred});
+  const star=qs('#detail-star');star.textContent=starred?'★':'☆';star.classList.toggle('starred',starred);
+  showToast(starred?'已收藏':'已取消收藏');
+}
+function detailEdit(){navigate('add',{editId:App.currentDetailId})}
+function detailDelete(){
+  showModal('删除单词','确认删除这个单词吗？此操作不可撤销。',()=>{
+    DB.words.remove(App.currentDetailId);showToast('已删除');navigate(App.prevPage||'library');
+  });
+}
+function speakDetailWord(accent){
+  const word=qs('#detail-word').textContent;if(!word)return;
+  const u=new SpeechSynthesisUtterance(word);u.lang=accent==='uk'?'en-GB':'en-US';
+  speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function statsRender(){
+  const words=DB.words.get(),stats=DB.stats.get();
+  const known=words.filter(w=>w.status==='known').length;
+  const fuzzy=words.filter(w=>w.status==='fuzzy').length;
+  const unknown=words.filter(w=>w.status==='unknown').length;
+  const total=words.length;
+  // Top cards
+  qs('#stats-top').innerHTML=`
+    <div class="stats-card"><div class="stats-card-num">🔥 ${stats.streak||0}</div><div class="stats-card-label">连续学习天数</div></div>
+    <div class="stats-card"><div class="stats-card-num">${total}</div><div class="stats-card-label">总词汇数</div></div>
+    <div class="stats-card"><div class="stats-card-num" style="color:var(--known)">${known}</div><div class="stats-card-label">已掌握</div></div>
+    <div class="stats-card"><div class="stats-card-num" style="color:var(--unknown)">${unknown}</div><div class="stats-card-label">不认识</div></div>`;
+  // Progress bars
+  const pct=(n)=>total>0?Math.round(n/total*100):0;
+  qs('#stats-progress').innerHTML=`
+    <div class="progress-row"><div class="progress-label">已掌握</div><div class="progress-track2"><div class="progress-fill2 fill-known" style="width:${pct(known)}%"></div></div><div class="progress-pct">${pct(known)}%</div></div>
+    <div class="progress-row"><div class="progress-label">模糊</div><div class="progress-track2"><div class="progress-fill2 fill-fuzzy" style="width:${pct(fuzzy)}%"></div></div><div class="progress-pct">${pct(fuzzy)}%</div></div>
+    <div class="progress-row"><div class="progress-label">不认识</div><div class="progress-track2"><div class="progress-fill2 fill-unknown" style="width:${pct(unknown)}%"></div></div><div class="progress-pct">${pct(unknown)}%</div></div>`;
+  // 7-day chart
+  const hist=stats.history||[];
+  const days=[];
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10))}
+  const maxV=Math.max(...days.map(d=>{const h=hist.find(x=>x.date===d);return h?(h.n||0)+(h.r||0):0}),1);
+  qs('#stats-chart').innerHTML=days.map(d=>{
+    const h=hist.find(x=>x.date===d),v=h?(h.n||0)+(h.r||0):0;
+    const pct=Math.round(v/maxV*100);
+    const label=d.slice(5).replace('-','/');
+    return`<div class="chart-col"><div class="chart-bar-val">${v||''}</div><div class="chart-bar" style="height:${Math.max(pct,v>0?8:0)}%"></div><div class="chart-bar-label">${label}</div></div>`;
+  }).join('');
+  // Source distribution
+  const srcMap={};words.forEach(w=>{if(w.source){srcMap[w.source]=(srcMap[w.source]||0)+1}});
+  const srcEntries=Object.entries(srcMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxSrc=srcEntries[0]?.[1]||1;
+  qs('#stats-source').innerHTML=srcEntries.length===0?'<div style="color:var(--text-3);font-size:13px">暂无数据</div>':srcEntries.map(([k,v])=>`<div class="dist-row"><div class="dist-label">${k}</div><div class="dist-bar-track"><div class="dist-bar-fill" style="width:${Math.round(v/maxSrc*100)}%"></div></div><div class="dist-count">${v}</div></div>`).join('');
+  // Tag distribution
+  const tagMap={};words.forEach(w=>(w.tags||[]).forEach(t=>{tagMap[t]=(tagMap[t]||0)+1}));
+  const tagEntries=Object.entries(tagMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxTag=tagEntries[0]?.[1]||1;
+  qs('#stats-tags').innerHTML=tagEntries.length===0?'<div style="color:var(--text-3);font-size:13px">暂无数据</div>':tagEntries.map(([k,v])=>`<div class="dist-row"><div class="dist-label">${k}</div><div class="dist-bar-track"><div class="dist-bar-fill" style="width:${Math.round(v/maxTag*100)}%;background:var(--accent-dark)"></div></div><div class="dist-count">${v}</div></div>`).join('');
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function settingsRender(){
+  const s=DB.settings.get();
+  qs('#setting-dailyNew').textContent=s.dailyNew;
+  qs('#setting-dailyReview').textContent=s.dailyReview;
+  qs('#toggle-en').checked=s.showEnMeaning;
+  qs('#toggle-example').checked=s.showExample;
+}
+function stepperChange(key,delta){
+  const s=DB.settings.get();s[key]=Math.max(1,Math.min(99,(s[key]||10)+delta));DB.settings.set(s);settingsRender()}
+function toggleSetting(key){const s=DB.settings.get();s[key]=!s[key];DB.settings.set(s)}
+function settingsExport(){
+  const data={words:DB.words.get(),settings:DB.settings.get(),stats:DB.stats.get(),exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`techwords-backup-${today()}.json`;a.click();
+  showToast('导出成功');
+}
+function settingsImport(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(data.words){DB.words.set(data.words)}
+      if(data.settings){DB.settings.set(data.settings)}
+      if(data.stats){DB.stats.set(data.stats)}
+      showToast(`导入成功，共 ${(data.words||[]).length} 个单词`);
+      settingsRender();
+    }catch{showToast('文件格式错误')}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+function confirmClear(){
+  showModal('清空全部数据','所有单词和学习记录将被永久删除，此操作不可撤销。',()=>{
+    localStorage.removeItem('tw_words');localStorage.removeItem('tw_stats');
+    showToast('已清空');settingsRender();homeRender();
+  });
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+let _modalCb=null;
+function showModal(title,desc,cb){
+  qs('#modal-title').textContent=title;qs('#modal-desc').textContent=desc;_modalCb=cb;
+  qs('#modal-confirm').classList.add('open');
+}
+function modalClose(){qs('#modal-confirm').classList.remove('open');_modalCb=null}
+qs('#modal-ok-btn').onclick=()=>{if(_modalCb)_modalCb();modalClose()}
+qs('#modal-confirm').addEventListener('click',e=>{if(e.target===qs('#modal-confirm'))modalClose()})
+
+// ============================================================
+// SERVICE WORKER
+// ============================================================
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+
+// ============================================================
+// INIT
+// ============================================================
+// Add sample words if first launch
+function addSampleWords(){
+  if(DB.words.get().length>0)return;
+  const samples=[
+    {id:uid(),word:'autopilot',phonetic:'/ˈɔːtəʊˌpaɪlət/',zhMeaning:'全自动执行；自动驾驶',enMeaning:'Autonomous task execution without manual intervention.',example:'Run /autopilot to handle the full development lifecycle.',exampleZh:'运行 /autopilot 自动处理完整开发流程。',source:'Claude',tags:['AI','Claude Code'],notes:'oh-my-claudecode 核心技能',status:'unknown',createdAt:Date.now()-DAY*3,nextReview:Date.now(),reviewCount:0,starred:false},
+    {id:uid(),word:'orchestration',phonetic:'/ˌɔːkɪˈstreɪʃn/',zhMeaning:'（多 Agent）编排；协调管理',enMeaning:'The automated coordination of multiple services or agents.',example:'OMC provides multi-agent orchestration for Claude Code.',exampleZh:'OMC 为 Claude Code 提供多 Agent 编排能力。',source:'Claude',tags:['AI'],notes:'',status:'unknown',createdAt:Date.now()-DAY*2,nextReview:Date.now(),reviewCount:0,starred:false},
+    {id:uid(),word:'spaced repetition',phonetic:'/speɪst ˌrepɪˈtɪʃn/',zhMeaning:'间隔重复（记忆法）',enMeaning:'A learning technique that uses increasing intervals between reviews.',example:'This app uses spaced repetition to help you memorize vocabulary.',exampleZh:'本应用使用间隔重复法帮助你记忆单词。',source:'技术文档',tags:['学习'],notes:'艾宾浩斯遗忘曲线的应用',status:'fuzzy',createdAt:Date.now()-DAY,nextReview:Date.now()+DAY,reviewCount:1,starred:true},
+    {id:uid(),word:'deprecate',phonetic:'/ˈdeprəkeɪt/',zhMeaning:'弃用；标记为过时',enMeaning:'To declare something obsolete and discourage its use.',example:'This API has been deprecated, please use the new version.',exampleZh:'此 API 已弃用，请使用新版本。',source:'GitHub',tags:['开发'],notes:'',status:'unknown',createdAt:Date.now(),nextReview:Date.now(),reviewCount:0,starred:false},
+    {id:uid(),word:'idempotent',phonetic:'/aɪˈdempətənt/',zhMeaning:'幂等的（多次操作结果相同）',enMeaning:'Producing the same result no matter how many times it is applied.',example:'HTTP GET requests should be idempotent.',exampleZh:'HTTP GET 请求应该是幂等的。',source:'技术文档',tags:['开发','网络'],notes:'',status:'unknown',createdAt:Date.now()-DAY*5,nextReview:Date.now(),reviewCount:0,starred:false},
+  ];
+  DB.words.set(samples);
+}
+
+addSampleWords();
+homeRender();
+</script>
+</body>
+</html>
