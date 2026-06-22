@@ -1,8 +1,12 @@
-const CACHE_NAME = 'techwords-v1';
+const CACHE_NAME = 'techwords-v1.1.0';
 const ASSETS = [
+  './',
   './index.html',
   './manifest.json',
   './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './words-data.js',
 ];
 
 self.addEventListener('install', e => {
@@ -22,7 +26,19 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  if(e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(e.request).then(response => {
+      if(response && response.ok && new URL(e.request.url).origin === self.location.origin){
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(e.request, copy));
+      }
+      return response;
+    }).catch(async () => {
+      const cached = await caches.match(e.request);
+      if(cached) return cached;
+      if(e.request.mode === 'navigate') return caches.match('./index.html');
+      return Response.error();
+    })
   );
 });
