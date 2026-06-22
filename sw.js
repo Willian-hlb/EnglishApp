@@ -1,11 +1,11 @@
-const CACHE_NAME = 'techwords-v1.1.0';
+const CACHE_NAME = 'techwords-v1.1.1';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg',
   './icon-192.png',
   './icon-512.png',
+  './logo-mark.png',
   './words-data.js',
 ];
 

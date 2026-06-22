@@ -118,7 +118,8 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
 
 /* ===== HOME PAGE ===== */
 .home-top{padding:calc(var(--safe-top) + 16px) 20px 0;background:var(--card);border-bottom:1px solid var(--border);padding-bottom:16px}
-.home-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.home-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;position:relative;min-height:52px}
+.home-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:50px;height:50px;object-fit:contain}
 .home-greeting{font-size:22px;font-weight:700;color:var(--text-1)}
 .home-date{font-size:13px;color:var(--text-3);margin-top:2px}
 .streak-badge{display:flex;align-items:center;gap:5px;background:var(--fuzzy-bg);color:var(--fuzzy);padding:6px 12px;border-radius:var(--r-pill);font-size:13px;font-weight:600;border:1px solid var(--fuzzy-b)}
@@ -195,6 +196,11 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
 .quiz-panel{display:none;background:var(--card);margin:16px;border-radius:var(--r-lg);box-shadow:var(--shadow-md);padding:24px}
 .quiz-prompt-label{font-size:12px;color:var(--text-3);font-weight:600;text-align:center;margin-bottom:8px}
 .quiz-prompt{font-size:30px;font-weight:800;text-align:center;color:var(--text-1);word-break:break-word;margin-bottom:22px}
+.quiz-prompt.speakable,.quiz-option.speakable{cursor:pointer}
+.quiz-prompt.speakable:active,.quiz-option.speakable:active{transform:scale(.99)}
+.quiz-prompt-zh{display:none;margin:-12px 0 20px;text-align:center;color:var(--text-3);font-size:14px;line-height:1.6}
+.quiz-tools{display:flex;justify-content:flex-end;margin-bottom:8px}
+.quiz-word-info{padding:6px 10px;font-size:12px}
 .quiz-options{display:grid;gap:10px}
 .quiz-option{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:var(--r-md);background:var(--bg);font-size:15px;text-align:left;color:var(--text-1)}
 .quiz-option.correct{background:var(--known-bg);border-color:var(--known);color:var(--known)}
@@ -218,6 +224,7 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
 .search-result-count{font-size:11px;color:var(--text-3);padding:6px 4px 0}
 .library-filters{padding:10px 20px;background:var(--card);border-bottom:1px solid var(--border)}
 .word-list{padding:0 20px}
+.today-learned-list{flex:1;overflow-y:auto;padding-bottom:24px}
 .word-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer}
 .word-item:last-child{border-bottom:none}
 .word-item:active{opacity:.7}
@@ -331,6 +338,7 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
         <div class="home-greeting" id="home-greeting">早上好</div>
         <div class="home-date" id="home-date"></div>
       </div>
+      <img class="home-logo" src="logo-mark.png" alt="TechWords">
       <div class="streak-badge" id="home-streak">🔥 0 天</div>
     </div>
   </div>
@@ -349,6 +357,7 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
     <div style="display:grid;gap:10px">
       <button class="btn btn-start btn-full" id="start-learn-btn" onclick="startDailyLearn()">开始学习</button>
       <button class="btn btn-start btn-full" id="start-review-btn" onclick="startDailyReview()">开始复习</button>
+      <button class="btn btn-secondary btn-full" id="today-learned-btn" onclick="navigate('today')">📖 查看今日已学</button>
     </div>
   </div>
   <div class="overview-grid">
@@ -381,6 +390,18 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
   <div style="padding:0 20px 8px;display:flex;justify-content:flex-end">
     <button class="btn btn-secondary btn-sm" onclick="navigate('settings')">⚙ 设置</button>
   </div>
+</div>
+
+<!-- ========== TODAY LEARNED PAGE ========== -->
+<div class="page page-nofooter" id="page-today">
+  <div class="page-header">
+    <button class="btn-icon" onclick="navigate('home')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="page-title">今日已学</div>
+    <div style="width:40px;text-align:right;color:var(--text-3);font-size:13px" id="today-learned-count">0</div>
+  </div>
+  <div class="word-list today-learned-list" id="today-learned-list"></div>
 </div>
 
 <!-- ========== LEARN PAGE ========== -->
@@ -448,8 +469,12 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
       </div>
     </div>
     <div class="quiz-panel" id="quiz-panel">
+      <div class="quiz-tools">
+        <button class="btn btn-secondary quiz-word-info" onclick="openCurrentTrainingDetail()">查看单词</button>
+      </div>
       <div class="quiz-prompt-label" id="quiz-prompt-label"></div>
       <div class="quiz-prompt" id="quiz-prompt"></div>
+      <div class="quiz-prompt-zh" id="quiz-prompt-zh"></div>
       <div class="quiz-options" id="quiz-options"></div>
       <div class="spell-answer" id="spell-answer" style="display:none"></div>
       <div class="letter-bank" id="letter-bank"></div>
@@ -665,7 +690,7 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
       <div class="settings-item" style="cursor:default">
         <div class="settings-item-icon" style="background:#EBF3FA">ℹ️</div>
         <div class="settings-item-body"><div class="settings-item-title">版本</div></div>
-        <div class="settings-item-right" style="color:var(--text-3);font-size:14px" id="app-version">v1.1.0</div>
+        <div class="settings-item-right" style="color:var(--text-3);font-size:14px" id="app-version">v1.1.1</div>
       </div>
     </div>
   </div>
@@ -674,7 +699,7 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
 <!-- ========== WORD DETAIL PAGE ========== -->
 <div class="page" id="page-detail">
   <div class="page-header">
-    <button class="btn-icon" onclick="history.back(), navigate(App.prevPage||'library')">
+    <button class="btn-icon" onclick="detailBack()">
       <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     </button>
     <div class="page-title" id="detail-page-title">单词详情</div>
@@ -726,7 +751,7 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
       <div class="detail-notes" id="detail-notes"></div>
     </div>
   </div>
-  <div class="detail-actions">
+  <div class="detail-actions" id="detail-actions">
     <button class="btn btn-secondary btn-full" onclick="detailEdit()">✏ 编辑</button>
     <button class="btn btn-danger btn-sm" onclick="detailDelete()">删除</button>
   </div>
@@ -776,7 +801,7 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
 // ============================================================
 // CONSTANTS
 // ============================================================
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.1';
 const DATA_SCHEMA_VERSION = 4;
 const SOURCES = ['AI','Claude','ChatGPT','GitHub','Linux','Docker','DevOps','API','开发','编程','开发工具','技术文档','产品','VPN','投标文件','其他'];
 const PRESET_TAGS = ['AI','LLM','Claude Code','Git','GitHub','Linux','Docker','DevOps','API','开发','工具','前端','网络','系统','命令行','安全','CI/CD'];
@@ -920,7 +945,7 @@ function ensureReviewSession(){
 // ============================================================
 // ROUTER / NAVIGATION
 // ============================================================
-const App={currentPage:'home',prevPage:'home',studyType:'learn',learnQueue:[],learnIdx:0,learnStats:{n:0,r:0,correct:0,wrong:0},learnMode:'card',quizAnswered:false,spellParts:[],spellSelected:[],currentTask:null,currentFilter:'all',currentDetailId:null,addEditId:null,addSelectedSource:'',addSelectedTags:[]};
+const App={currentPage:'home',prevPage:'home',detailReturnPage:'library',studyType:'learn',learnQueue:[],learnIdx:0,learnStats:{n:0,r:0,correct:0,wrong:0},learnMode:'card',quizAnswered:false,spellParts:[],spellSelected:[],currentTask:null,currentFilter:'all',currentDetailId:null,addEditId:null,addSelectedSource:'',addSelectedTags:[]};
 
 function navigate(page,params={}){
   qsa('.page').forEach(p=>p.classList.remove('active'));
@@ -933,9 +958,9 @@ function navigate(page,params={}){
   qsa('.nav-item').forEach(item=>item.classList.toggle('active',item.dataset.page===page));
   // Show/hide bottom nav
   const nav=document.getElementById('bottom-nav');
-  nav.style.display=['learn','add','settings','detail'].includes(page)?'none':'flex';
+  nav.style.display=['learn','today','add','settings','detail'].includes(page)?'none':'flex';
   // Page init
-  const inits={home:homeRender,library:libraryRender,stats:statsRender,settings:settingsRender,learn:learnInit,add:()=>addInit(params)};
+  const inits={home:homeRender,today:todayLearnedRender,library:libraryRender,stats:statsRender,settings:settingsRender,learn:learnInit,add:()=>addInit(params)};
   inits[page]?.();
 }
 
@@ -1009,6 +1034,33 @@ function startDailyReview(){
   const session=ensureReviewSession();
   if(session.review.completed){showToast(session.review.wordIds.length?'今日复习已完成':'暂无待复习');return}
   App.studyType='review';navigate('learn');
+}
+
+function todayLearnedIds(){
+  const part=getDailySession().learn;
+  if(!part)return[];
+  if(part.completed||part.stage==='training')return[...part.wordIds];
+  return part.wordIds.slice(0,Math.min((part.index||0)+1,part.wordIds.length));
+}
+
+function todayLearnedRender(){
+  const ids=todayLearnedIds(),byId=new Map(DB.words.get().map(w=>[w.id,w]));
+  const words=ids.map(id=>byId.get(id)).filter(Boolean);
+  qs('#today-learned-count').textContent=words.length;
+  const list=qs('#today-learned-list');
+  if(!words.length){
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">📖</div><div class="empty-title">今天还没有学过单词</div><div class="empty-desc">返回首页开始今日学习后，这里会记录已经看过的新词。</div></div>';
+    return;
+  }
+  list.innerHTML=words.map(w=>`
+    <div class="word-item" onclick="openDetail('${w.id}','today')">
+      <div class="word-status-bar status-${w.status}"></div>
+      <div class="word-item-body">
+        <div class="word-item-en">${w.word}</div>
+        <div class="word-item-zh">${w.zhMeaning||''}</div>
+      </div>
+      <div class="word-item-right"><div class="word-item-star ${w.starred?'on':''}">${w.starred?'★':'☆'}</div></div>
+    </div>`).join('');
 }
 function startPrimaryStudy(){
   const session=getDailySession();
@@ -1113,6 +1165,9 @@ function renderQuiz(w){
   qs('#quiz-panel').dataset.word=encodeURIComponent(w.word);
   qs('#quiz-feedback').style.display='none';
   qs('#quiz-next').style.display='none';
+  const prompt=qs('#quiz-prompt'),promptZh=qs('#quiz-prompt-zh');
+  prompt.classList.remove('speakable');prompt.removeAttribute('data-speak');
+  prompt.removeAttribute('onclick');promptZh.style.display='none';promptZh.textContent='';
   qs('#quiz-options').innerHTML='';
   qs('#letter-bank').innerHTML='';
   qs('#spell-answer').style.display='none';
@@ -1120,23 +1175,28 @@ function renderQuiz(w){
     const answerField=App.learnMode==='enZh'?'zhMeaning':'word';
     if(App.learnMode==='enZh'){
       qs('#quiz-prompt-label').textContent='请选择正确中文释义';
-      qs('#quiz-prompt').textContent=w.word;
+      prompt.textContent=w.word;
+      makeQuizSpeakable(prompt,w.word);
     }else if(App.learnMode==='zhEn'){
       qs('#quiz-prompt-label').textContent='请选择对应英文';
-      qs('#quiz-prompt').textContent=w.zhMeaning;
+      prompt.textContent=w.zhMeaning;
     }else if(App.learnMode==='audio'){
       qs('#quiz-prompt-label').textContent='听发音，选择正确单词';
-      qs('#quiz-prompt').innerHTML='<button class="btn btn-secondary" onclick="speakQuizWord()">🔊 播放发音</button>';
+      prompt.innerHTML='<button class="btn btn-secondary" onclick="speakQuizWord()">🔊 播放发音</button>';
     }else{
       qs('#quiz-prompt-label').textContent='选择最适合填入例句的单词';
       const escaped=w.word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-      qs('#quiz-prompt').textContent=(w.example||'').replace(new RegExp(escaped,'ig'),'_____')||w.exampleZh||w.zhMeaning;
+      const sentence=(w.example||'').replace(new RegExp(escaped,'ig'),'_____')||w.exampleZh||w.zhMeaning;
+      prompt.textContent=sentence;
+      if(w.example)makeQuizSpeakable(prompt,w.example);
+      if(w.exampleZh){promptZh.textContent=w.exampleZh;promptZh.style.display='block'}
     }
     const options=shuffled([w[answerField],...quizDistractors(w,answerField)]);
-    qs('#quiz-options').innerHTML=options.map(v=>`<button class="quiz-option" data-value="${encodeURIComponent(v)}" data-answer="${encodeURIComponent(w[answerField])}" onclick="quizChoose(this)">${v}</button>`).join('');
+    const englishOptions=answerField==='word';
+    qs('#quiz-options').innerHTML=options.map(v=>`<button class="quiz-option ${englishOptions?'speakable':''}" data-value="${encodeURIComponent(v)}" data-answer="${encodeURIComponent(w[answerField])}" data-speak="${englishOptions?'1':'0'}" onclick="quizChoose(this)">${v}</button>`).join('');
   }else{
     qs('#quiz-prompt-label').textContent=w.word.includes(' ')?'按顺序拼出英文短语':'选择字母拼出英文单词';
-    qs('#quiz-prompt').textContent=w.zhMeaning;
+    prompt.textContent=w.zhMeaning;
     qs('#spell-answer').style.display='block';
     App.spellParts=w.word.includes(' ')?w.word.split(/\s+/):[...w.word];
     App.spellSelected=[];
@@ -1148,8 +1208,7 @@ function renderQuiz(w){
 
 function speakQuizWord(){
   const w=App.learnQueue[App.learnIdx];if(!w)return;
-  const u=new SpeechSynthesisUtterance(w.word);u.lang='en-US';
-  speechSynthesis.cancel();speechSynthesis.speak(u);
+  speakStudyText(w.word);
 }
 
 function quizChoose(button){
@@ -1161,11 +1220,17 @@ function quizChoose(button){
   });
   const correct=value===answer;
   if(!correct)button.classList.add('wrong');
-  recordQuizResult(correct);
+  const selectedIsEnglish=button.dataset.speak==='1';
+  if(selectedIsEnglish){
+    if(correct)speakStudyText(value);
+    else speakStudyText(value,()=>speakStudyWord(App.learnQueue[App.learnIdx]?.word));
+  }
+  recordQuizResult(correct,selectedIsEnglish);
 }
 
 function spellPick(button){
   if(App.quizAnswered||button.disabled)return;
+  speakStudyText(button.dataset.value);
   App.spellSelected.push(button.dataset.value);
   button.disabled=true;button.style.opacity='.35';
   updateSpellAnswer();
@@ -1181,7 +1246,7 @@ function updateSpellAnswer(){
   qs('#spell-answer').textContent=App.spellSelected.join(separator)||'…';
 }
 
-function recordQuizResult(correct){
+function recordQuizResult(correct,skipSpeech=false){
   const w=App.learnQueue[App.learnIdx];
   const session=getDailySession(),part=session[App.studyType],task=part.tasks[part.taskIndex];
   const result=part.results[w.id]||{correct:0,wrong:0};
@@ -1198,7 +1263,7 @@ function recordQuizResult(correct){
   stats.quizWrong=(stats.quizWrong||0)+(correct?0:1);
   DB.stats.set(stats);
   DB.session.set(session);
-  speakStudyWord(w.word);
+  if(!skipSpeech)speakStudyWord(w.word);
   const detail=[w.plainMeaning,w.contextMeaning].filter(Boolean).join(' ');
   qs('#quiz-feedback').innerHTML=`<div class="quiz-feedback-title">${correct?'✓ 回答正确':'✗ 正确答案：'+w.word+' — '+w.zhMeaning}</div>${detail||w.enMeaning||''}`;
   qs('#quiz-feedback').style.display='block';
@@ -1210,9 +1275,25 @@ function quizNext(){
 }
 
 function speakStudyWord(word){
-  if(!word||!('speechSynthesis' in window))return;
-  const u=new SpeechSynthesisUtterance(word);u.lang='en-US';
+  speakStudyText(word);
+}
+
+function speakStudyText(text,onend){
+  if(!text||!('speechSynthesis' in window))return;
+  const u=new SpeechSynthesisUtterance(text);u.lang='en-US';
+  if(onend)u.onend=onend;
   speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+
+function makeQuizSpeakable(element,text){
+  element.classList.add('speakable');
+  element.dataset.speak=encodeURIComponent(text);
+  element.setAttribute('onclick','speakStudyText(decodeURIComponent(this.dataset.speak))');
+}
+
+function openCurrentTrainingDetail(){
+  const w=App.learnQueue[App.learnIdx];
+  if(w)openDetail(w.id,'learn');
 }
 
 function learnToggleStar(){
@@ -1404,7 +1485,7 @@ function libraryList(){
 // WORD DETAIL
 // ============================================================
 function openDetail(id,from){
-  App.currentDetailId=id;App.prevPage=from||'library';
+  App.currentDetailId=id;App.detailReturnPage=from||App.currentPage||'library';
   const w=DB.words.get().find(x=>x.id===id);if(!w)return;
   qs('#detail-word').textContent=w.word;
   qs('#detail-phonetic').textContent=w.phonetic||'';
@@ -1434,7 +1515,19 @@ function openDetail(id,from){
   (w.tags||[]).forEach(t=>meta.push(`<span class="tag">${t}</span>`));
   qs('#detail-meta').innerHTML=meta.join('');
   const star=qs('#detail-star');star.textContent=w.starred?'★':'☆';star.classList.toggle('starred',!!w.starred);
+  qs('#detail-actions').style.display=App.detailReturnPage==='learn'?'none':'flex';
   navigate('detail');
+}
+
+function detailBack(){
+  const target=App.detailReturnPage||'library';
+  qsa('.page').forEach(p=>p.classList.remove('active'));
+  const el=qs('#page-'+target);
+  if(!el){navigate('home');return}
+  el.classList.add('active');
+  App.prevPage='detail';App.currentPage=target;
+  qsa('.nav-item').forEach(item=>item.classList.toggle('active',item.dataset.page===target));
+  qs('#bottom-nav').style.display=['learn','today','add','settings','detail'].includes(target)?'none':'flex';
 }
 
 function detailToggleStar(){
