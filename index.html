@@ -206,8 +206,12 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
 .quiz-option.correct{background:var(--known-bg);border-color:var(--known);color:var(--known)}
 .quiz-option.wrong{background:var(--unknown-bg);border-color:var(--unknown);color:var(--unknown)}
 .spell-answer{min-height:54px;border:1.5px dashed var(--border);border-radius:var(--r-md);padding:12px;text-align:center;font-size:22px;font-weight:700;letter-spacing:2px;margin-bottom:14px}
+.spell-answer-chip{display:inline-flex;align-items:center;justify-content:center;min-width:28px;margin:2px 3px;padding:4px 8px;border-radius:10px;background:var(--accent-pale);color:var(--accent);font-size:18px;letter-spacing:0;cursor:pointer}
 .letter-bank{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .letter-tile{min-width:38px;height:40px;padding:0 10px;border-radius:10px;background:var(--accent-pale);color:var(--accent);font-weight:700;font-size:16px}
+.letter-tile.selected{background:var(--accent);color:#fff;box-shadow:0 6px 18px rgba(74,127,165,.22)}
+.spell-controls{display:none;gap:8px;margin-top:14px}
+.spell-controls .btn{flex:1;padding:10px 12px;font-size:13px}
 .quiz-feedback{display:none;margin-top:18px;padding:14px;border-radius:var(--r-md);background:var(--accent-pale);font-size:14px;line-height:1.6;color:var(--text-2)}
 .quiz-feedback-title{font-weight:800;color:var(--text-1);margin-bottom:4px}
 .quiz-next{display:none;margin-top:14px;width:100%}
@@ -268,6 +272,40 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
 .fill-fuzzy{background:var(--fuzzy)}
 .fill-unknown{background:var(--unknown)}
 .progress-pct{font-size:12px;color:var(--text-3);width:36px;text-align:right;flex-shrink:0}
+
+/* ===== CALENDAR / MISTAKES ===== */
+.calendar-scroll,.mistake-scroll{flex:1;overflow-y:auto;padding:16px 20px 28px}
+.calendar-card{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:22px 20px;margin-bottom:16px}
+.calendar-month-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:18px}
+.calendar-month{font-size:20px;font-weight:800;color:var(--text-1);min-width:132px;text-align:center}
+.calendar-arrow{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:28px}
+.calendar-arrow:active{background:var(--bg2)}
+.calendar-weekdays,.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;text-align:center}
+.calendar-weekdays{border-top:1px solid var(--border);padding-top:16px;margin-bottom:8px;color:var(--text-3);font-size:11px;font-weight:800}
+.calendar-day{height:42px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--text-1);position:relative}
+.calendar-day.muted{color:var(--border)}
+.calendar-day.today{background:var(--bg2)}
+.calendar-day.active{background:var(--accent);color:#fff}
+.calendar-day.studied::after{content:'';position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:#FF7A1A}
+.calendar-day.active::after{background:#fff}
+.calendar-day.wrong{box-shadow:inset 0 0 0 2px rgba(155,43,32,.18)}
+.calendar-summary{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+.calendar-summary-item{background:var(--bg);border-radius:18px;padding:14px;text-align:center}
+.calendar-summary-label{font-size:12px;color:var(--text-3);font-weight:700}
+.calendar-summary-num{font-size:30px;font-weight:900;color:var(--text-1);line-height:1.1;margin-top:4px}
+.day-detail-card,.mistake-card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+.day-detail-title{font-size:15px;font-weight:800;color:var(--text-1);margin-bottom:10px}
+.day-record{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-top:1px solid var(--border)}
+.day-record:first-of-type{border-top:none}
+.record-badge{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;font-weight:900}
+.record-badge.ok{background:var(--known-bg);color:var(--known)}
+.record-badge.bad{background:var(--unknown-bg);color:var(--unknown)}
+.record-main{flex:1;min-width:0}
+.record-word{font-size:15px;font-weight:800;color:var(--text-1)}
+.record-meta{font-size:12px;color:var(--text-3);line-height:1.5;margin-top:2px}
+.record-answer{font-size:12px;color:var(--text-2);margin-top:4px}
+.mistake-action-row{display:flex;gap:8px;margin-top:12px}
+.mistake-count-pill{display:inline-flex;align-items:center;padding:3px 8px;border-radius:var(--r-pill);background:var(--unknown-bg);color:var(--unknown);font-size:11px;font-weight:800}
 
 /* ===== SETTINGS PAGE ===== */
 .settings-scroll{flex:1;overflow-y:auto;padding:16px 20px 20px}
@@ -339,7 +377,7 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
         <div class="home-date" id="home-date"></div>
       </div>
       <img class="home-logo" src="logo-mark.png" alt="TechWords">
-      <div class="streak-badge" id="home-streak">🔥 0 天</div>
+      <button class="streak-badge" id="home-streak" onclick="openCalendar()">🔥 0 天</button>
     </div>
   </div>
   <div class="today-card" id="today-card">
@@ -404,6 +442,58 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
   <div class="word-list today-learned-list" id="today-learned-list"></div>
 </div>
 
+<!-- ========== CALENDAR PAGE ========== -->
+<div class="page page-nofooter" id="page-calendar">
+  <div class="page-header">
+    <button class="btn-icon" onclick="navigate('home')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="page-title" style="text-align:center">日历</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="calendar-scroll">
+    <div class="calendar-card">
+      <div class="calendar-month-row">
+        <button class="calendar-arrow" onclick="calendarChangeMonth(-1)">‹</button>
+        <div class="calendar-month" id="calendar-month-label">2026年06月</div>
+        <button class="calendar-arrow" onclick="calendarChangeMonth(1)">›</button>
+      </div>
+      <div class="calendar-weekdays">
+        <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div class="calendar-summary">
+        <div class="calendar-summary-item">
+          <div class="calendar-summary-label">连续学习</div>
+          <div class="calendar-summary-num" id="calendar-streak">0</div>
+          <div class="calendar-summary-label">天</div>
+        </div>
+        <div class="calendar-summary-item">
+          <div class="calendar-summary-label">累计学习</div>
+          <div class="calendar-summary-num" id="calendar-total-days">0</div>
+          <div class="calendar-summary-label">天</div>
+        </div>
+      </div>
+    </div>
+    <div class="day-detail-card">
+      <div class="day-detail-title" id="calendar-selected-title">今日记录</div>
+      <div id="calendar-day-detail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MISTAKES PAGE ========== -->
+<div class="page page-nofooter" id="page-mistakes">
+  <div class="page-header">
+    <button class="btn-icon" onclick="navigate('home')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="page-title" id="mistakes-title">今日错题</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="mistake-scroll" id="mistakes-list"></div>
+</div>
+
 <!-- ========== LEARN PAGE ========== -->
 <div class="page page-nofooter" id="page-learn">
   <div class="learn-top">
@@ -434,6 +524,7 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
         <div class="complete-stat-label">复习</div>
       </div>
     </div>
+    <button class="btn btn-secondary" id="complete-mistakes-btn" onclick="navigate('mistakes',{date:today()})" style="display:none">查看今日错题</button>
     <button class="btn btn-primary" onclick="navigate('home')">返回首页</button>
   </div>
 
@@ -478,6 +569,11 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
       <div class="quiz-options" id="quiz-options"></div>
       <div class="spell-answer" id="spell-answer" style="display:none"></div>
       <div class="letter-bank" id="letter-bank"></div>
+      <div class="spell-controls" id="spell-controls">
+        <button class="btn btn-secondary" onclick="spellBackspace()">退格</button>
+        <button class="btn btn-secondary" onclick="spellClear()">清空</button>
+        <button class="btn btn-primary" onclick="spellSubmit()">提交</button>
+      </div>
       <div class="quiz-feedback" id="quiz-feedback"></div>
       <button class="btn btn-primary quiz-next" id="quiz-next" onclick="quizNext()">下一题</button>
     </div>
@@ -690,7 +786,7 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
       <div class="settings-item" style="cursor:default">
         <div class="settings-item-icon" style="background:#EBF3FA">ℹ️</div>
         <div class="settings-item-body"><div class="settings-item-title">版本</div></div>
-        <div class="settings-item-right" style="color:var(--text-3);font-size:14px" id="app-version">v1.1.1</div>
+        <div class="settings-item-right" style="color:var(--text-3);font-size:14px" id="app-version">v1.1.2</div>
       </div>
     </div>
   </div>
@@ -801,8 +897,9 @@ svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;str
 // ============================================================
 // CONSTANTS
 // ============================================================
-const APP_VERSION = '1.1.1';
-const DATA_SCHEMA_VERSION = 4;
+const APP_VERSION = '1.1.2';
+const DATA_SCHEMA_VERSION = 5;
+const HIGH_FREQ_WORDS = new Set(['session','settings','profile','billing','usage','notifications','privacy','shared links','capabilities','connectors','permissions','voice','appearance','account','upgrade','plan','team','workspace','project','overview','deploy','logs','support','feedback']);
 const SOURCES = ['AI','Claude','ChatGPT','GitHub','Linux','Docker','DevOps','API','开发','编程','开发工具','技术文档','产品','VPN','投标文件','其他'];
 const PRESET_TAGS = ['AI','LLM','Claude Code','Git','GitHub','Linux','Docker','DevOps','API','开发','工具','前端','网络','系统','命令行','安全','CI/CD'];
 const FILTERS = [
@@ -882,6 +979,48 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 function qs(sel,root=document){return root.querySelector(sel)}
 function qsa(sel,root=document){return [...root.querySelectorAll(sel)]}
 
+function dayLabel(dateKey){
+  const [y,m,d]=dateKey.split('-').map(Number);
+  return `${y}年${String(m).padStart(2,'0')}月${String(d).padStart(2,'0')}日`;
+}
+function normalizeHistoryEntry(entry){
+  if(!entry)return null;
+  return {date:entry.date,n:entry.n||0,r:entry.r||0,correct:entry.correct||0,wrong:entry.wrong||0,records:Array.isArray(entry.records)?entry.records:[]};
+}
+function getHistoryEntry(dateKey){
+  return normalizeHistoryEntry((DB.stats.get().history||[]).find(h=>h.date===dateKey));
+}
+function upsertHistoryRecord(record){
+  const stats=DB.stats.get(),hist=(stats.history||[]).map(normalizeHistoryEntry).filter(Boolean);
+  let entry=hist.find(h=>h.date===record.date);
+  if(!entry){entry={date:record.date,n:0,r:0,correct:0,wrong:0,records:[]};hist.push(entry)}
+  entry.correct+=(record.correct?1:0);
+  entry.wrong+=(record.correct?0:1);
+  entry.records.push(record);
+  if(!record.correct){
+    const queue=stats.mistakeQueue||{};
+    queue[record.wordId]={wordId:record.wordId,lastWrongDate:record.date,count:(queue[record.wordId]?.count||0)+1};
+    stats.mistakeQueue=queue;
+  }
+  stats.history=hist.sort((a,b)=>a.date.localeCompare(b.date)).slice(-180);
+  DB.stats.set(stats);
+}
+function getDayRecords(dateKey){
+  return getHistoryEntry(dateKey)?.records||[];
+}
+function getDayWrongRecords(dateKey=today()){
+  return getDayRecords(dateKey).filter(r=>!r.correct);
+}
+function highFrequencyLearnedWords(words,exclude=new Set(),limit=3){
+  return shuffled(words.filter(w=>(w.attemptCount||0)>0&&!exclude.has(w.id)&&(HIGH_FREQ_WORDS.has(String(w.word||'').toLowerCase())||(w.tags||[]).includes('高频界面')))).slice(0,limit);
+}
+function potentialPracticeCount(words){
+  const stats=DB.stats.get(),queue=stats.mistakeQueue||{};
+  const carry=Object.values(queue).filter(x=>x&&x.lastWrongDate&&x.lastWrongDate<today()).length;
+  const high=words.filter(w=>(w.attemptCount||0)>0&&(HIGH_FREQ_WORDS.has(String(w.word||'').toLowerCase())||(w.tags||[]).includes('高频界面'))).length;
+  return Math.min(3,carry+high);
+}
+
 function calcNextReview(word,answer){
   const now=Date.now();
   const attemptCount=(word.attemptCount||0)+1;
@@ -903,15 +1042,15 @@ function getDailySession(){
 
 function createTasks(wordIds,type){
   const modes=['enZh','zhEn','spell','audio','cloze'];
+  const ids=[...new Set(wordIds)].filter(Boolean);
+  const rounds=type==='learn'?2:1;
   const tasks=[];
-  wordIds.forEach((wordId,index)=>{
-    if(type==='learn'){
-      tasks.push({wordId,mode:'enZh',retry:0});
-      tasks.push({wordId,mode:modes[(index+1)%modes.length],retry:0});
-    }else{
-      tasks.push({wordId,mode:modes[index%modes.length],retry:0});
-    }
-  });
+  for(let round=0;round<rounds;round++){
+    shuffled(ids).forEach((wordId,index)=>{
+      const mode=type==='learn'&&round===0?'enZh':modes[(index+round)%modes.length];
+      tasks.push({wordId,mode,retry:0});
+    });
+  }
   return tasks;
 }
 
@@ -919,9 +1058,19 @@ function ensureLearnSession(){
   const session=getDailySession();
   if(!session.learn){
     const settings=DB.settings.get();
-    const candidates=DB.words.get().filter(w=>(w.attemptCount||0)===0);
+    const allWords=DB.words.get();
+    const candidates=allWords.filter(w=>(w.attemptCount||0)===0);
     const selected=shuffled(candidates).slice(0,settings.dailyNew).map(w=>w.id);
-    session.learn={wordIds:selected,stage:'exposure',index:0,tasks:[],taskIndex:0,results:{},completed:selected.length===0,completedAt:null};
+    const exclude=new Set(selected);
+    const stats=DB.stats.get(),queue=stats.mistakeQueue||{};
+    const carryIds=Object.values(queue)
+      .filter(x=>x&&x.lastWrongDate&&x.lastWrongDate<today()&&!exclude.has(x.wordId))
+      .sort((a,b)=>(b.count||0)-(a.count||0))
+      .slice(0,3).map(x=>x.wordId);
+    carryIds.forEach(id=>exclude.add(id));
+    const frequentIds=highFrequencyLearnedWords(allWords,exclude,Math.max(0,3-carryIds.length)).map(w=>w.id);
+    const practiceIds=[...new Set([...carryIds,...frequentIds])];
+    session.learn={wordIds:selected,practiceIds,stage:'exposure',index:0,tasks:[],taskIndex:0,results:{},completed:selected.length===0&&practiceIds.length===0,completedAt:null};
     DB.session.set(session);
   }
   return session;
@@ -945,7 +1094,7 @@ function ensureReviewSession(){
 // ============================================================
 // ROUTER / NAVIGATION
 // ============================================================
-const App={currentPage:'home',prevPage:'home',detailReturnPage:'library',studyType:'learn',learnQueue:[],learnIdx:0,learnStats:{n:0,r:0,correct:0,wrong:0},learnMode:'card',quizAnswered:false,spellParts:[],spellSelected:[],currentTask:null,currentFilter:'all',currentDetailId:null,addEditId:null,addSelectedSource:'',addSelectedTags:[]};
+const App={currentPage:'home',prevPage:'home',detailReturnPage:'library',studyType:'learn',learnQueue:[],learnIdx:0,learnStats:{n:0,r:0,correct:0,wrong:0},learnMode:'card',quizAnswered:false,spellParts:[],spellSelected:[],currentTask:null,currentFilter:'all',currentDetailId:null,addEditId:null,addSelectedSource:'',addSelectedTags:[],calendarMonth:null,calendarSelected:null};
 
 function navigate(page,params={}){
   qsa('.page').forEach(p=>p.classList.remove('active'));
@@ -958,9 +1107,9 @@ function navigate(page,params={}){
   qsa('.nav-item').forEach(item=>item.classList.toggle('active',item.dataset.page===page));
   // Show/hide bottom nav
   const nav=document.getElementById('bottom-nav');
-  nav.style.display=['learn','today','add','settings','detail'].includes(page)?'none':'flex';
+  nav.style.display=['learn','today','calendar','mistakes','add','settings','detail'].includes(page)?'none':'flex';
   // Page init
-  const inits={home:homeRender,today:todayLearnedRender,library:libraryRender,stats:statsRender,settings:settingsRender,learn:learnInit,add:()=>addInit(params)};
+  const inits={home:homeRender,today:todayLearnedRender,calendar:()=>calendarRender(params),mistakes:()=>mistakesRender(params),library:libraryRender,stats:statsRender,settings:settingsRender,learn:learnInit,add:()=>addInit(params)};
   inits[page]?.();
 }
 
@@ -982,14 +1131,16 @@ function homeRender(){
   // today fixed sessions
   const session=getDailySession();
   const learnAvailable=session.learn?session.learn.wordIds.length:Math.min(words.filter(w=>(w.attemptCount||0)===0).length,settings.dailyNew);
+  const practiceAvailable=session.learn?(session.learn.practiceIds||[]).length:potentialPracticeCount(words);
+  const learnHasWork=learnAvailable>0||practiceAvailable>0;
   const learnProgress=session.learn?(session.learn.stage==='exposure'?session.learn.index:session.learn.wordIds.length):0;
   const learnBtn=qs('#start-learn-btn');
   qs('#today-new-count').textContent=learnAvailable;
-  if(session.learn?.completed||learnAvailable===0){
-    learnBtn.textContent=learnAvailable===0?'暂无新词':'今日学习已完成';
+  if(session.learn?.completed||!learnHasWork){
+    learnBtn.textContent=!learnHasWork?'暂无新词':'今日学习已完成';
     learnBtn.disabled=true;learnBtn.style.opacity='.55';
   }else{
-    learnBtn.textContent=session.learn?(session.learn.stage==='exposure'?`继续学习 ${Math.min(learnProgress+1,learnAvailable)}/${learnAvailable}`:'继续训练'):`开始学习 ${learnAvailable}个新词`;
+    learnBtn.textContent=session.learn?(session.learn.stage==='exposure'?`继续学习 ${Math.min(learnProgress+1,Math.max(learnAvailable,1))}/${Math.max(learnAvailable,1)}`:'继续训练'):(learnAvailable?`开始学习 ${learnAvailable}个新词`:'巩固高频/错词');
     learnBtn.disabled=false;learnBtn.style.opacity='1';
   }
   const learnedToday=new Set(session.learn?.wordIds||[]);
@@ -1062,6 +1213,114 @@ function todayLearnedRender(){
       <div class="word-item-right"><div class="word-item-star ${w.starred?'on':''}">${w.starred?'★':'☆'}</div></div>
     </div>`).join('');
 }
+
+function openCalendar(){
+  navigate('calendar',{date:today()});
+}
+
+function calendarRender(params={}){
+  const initial=params.date||App.calendarSelected||today();
+  App.calendarSelected=initial;
+  if(!App.calendarMonth){
+    const [y,m]=initial.split('-').map(Number);
+    App.calendarMonth=new Date(y,m-1,1);
+  }
+  renderCalendarGrid();
+}
+
+function calendarChangeMonth(delta){
+  const d=App.calendarMonth||new Date();
+  App.calendarMonth=new Date(d.getFullYear(),d.getMonth()+delta,1);
+  renderCalendarGrid();
+}
+
+function calendarSelectDate(dateKey){
+  App.calendarSelected=dateKey;
+  const [y,m]=dateKey.split('-').map(Number);
+  App.calendarMonth=new Date(y,m-1,1);
+  renderCalendarGrid();
+}
+
+function renderCalendarGrid(){
+  const stats=DB.stats.get();
+  const month=App.calendarMonth||new Date();
+  const y=month.getFullYear(),m=month.getMonth();
+  qs('#calendar-month-label').textContent=`${y}年${String(m+1).padStart(2,'0')}月`;
+  const hist=(stats.history||[]).map(normalizeHistoryEntry).filter(Boolean);
+  const byDate=new Map(hist.map(h=>[h.date,h]));
+  const first=new Date(y,m,1);
+  const firstMonIndex=(first.getDay()+6)%7;
+  const start=new Date(y,m,1-firstMonIndex);
+  const cells=[];
+  for(let i=0;i<42;i++){
+    const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i);
+    const key=localDateKey(d),entry=byDate.get(key),inMonth=d.getMonth()===m;
+    const classes=['calendar-day'];
+    if(!inMonth)classes.push('muted');
+    if(key===today())classes.push('today');
+    if(key===App.calendarSelected)classes.push('active');
+    if(entry&&(entry.n||entry.r||entry.records.length))classes.push('studied');
+    if(entry&&entry.wrong)classes.push('wrong');
+    cells.push(`<button class="${classes.join(' ')}" onclick="calendarSelectDate('${key}')" aria-label="${key}">${d.getDate()}</button>`);
+  }
+  qs('#calendar-grid').innerHTML=cells.join('');
+  qs('#calendar-streak').textContent=stats.streak||0;
+  qs('#calendar-total-days').textContent=hist.filter(h=>h.n||h.r||h.records.length).length;
+  renderCalendarDayDetail(App.calendarSelected||today());
+}
+
+function modeLabel(mode){
+  return {enZh:'英选中',zhEn:'中选英',spell:'中文拼英文',audio:'听音选词',cloze:'例句填空'}[mode]||mode||'训练';
+}
+
+function renderCalendarDayDetail(dateKey){
+  qs('#calendar-selected-title').textContent=`${dayLabel(dateKey)} 记录`;
+  const entry=getHistoryEntry(dateKey),records=getDayRecords(dateKey);
+  const box=qs('#calendar-day-detail');
+  if(!entry||(!entry.n&&!entry.r&&!records.length)){
+    box.innerHTML='<div class="empty-state" style="padding:28px 12px"><div class="empty-icon">🌙</div><div class="empty-title">这天没有学习记录</div><div class="empty-desc">点击有橙色标记的日期，可以查看当天学习和错题。</div></div>';
+    return;
+  }
+  const summary=`<div class="calendar-summary" style="margin:0 0 12px"><div class="calendar-summary-item"><div class="calendar-summary-label">新词/复习</div><div class="calendar-summary-num">${entry.n||0}/${entry.r||0}</div></div><div class="calendar-summary-item"><div class="calendar-summary-label">答对/答错</div><div class="calendar-summary-num">${entry.correct||0}/${entry.wrong||0}</div></div></div>`;
+  const list=records.length?records.slice().reverse().map(recordHtml).join(''):'<div class="empty-desc">当天只有学习完成记录，暂无逐题明细。</div>';
+  const wrong=records.filter(r=>!r.correct).length;
+  box.innerHTML=summary+list+(wrong?`<div class="mistake-action-row"><button class="btn btn-secondary btn-full" onclick="navigate('mistakes',{date:'${dateKey}'})">查看这天错题 ${wrong}</button></div>`:'');
+}
+
+function recordHtml(r){
+  return `<div class="day-record" onclick="openDetail('${r.wordId}','${App.currentPage}')">
+    <div class="record-badge ${r.correct?'ok':'bad'}">${r.correct?'✓':'×'}</div>
+    <div class="record-main">
+      <div class="record-word">${r.word||''}</div>
+      <div class="record-meta">${r.zhMeaning||''} · ${modeLabel(r.mode)} · ${r.studyType==='review'?'复习':'学习'}</div>
+      ${r.correct?'':`<div class="record-answer">你的答案：${r.userAnswer||'未记录'}；正确答案：${r.correctAnswer||r.word||''}</div>`}
+    </div>
+  </div>`;
+}
+
+function mistakesRender(params={}){
+  const dateKey=params.date||today();
+  qs('#mistakes-title').textContent=`${dateKey===today()?'今日':dayLabel(dateKey)}错题`;
+  const records=getDayWrongRecords(dateKey);
+  const list=qs('#mistakes-list');
+  if(!records.length){
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">没有错题</div><div class="empty-desc">这一天没有记录到答错的训练题。</div></div>';
+    return;
+  }
+  list.innerHTML=records.slice().reverse().map(r=>`
+    <div class="mistake-card">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="record-word" style="flex:1">${r.word}</div>
+        <span class="mistake-count-pill">${modeLabel(r.mode)}</span>
+      </div>
+      <div class="record-meta">${r.zhMeaning||''}</div>
+      <div class="record-answer">你的答案：${r.userAnswer||'未记录'}<br>正确答案：${r.correctAnswer||r.word}</div>
+      <div class="mistake-action-row">
+        <button class="btn btn-secondary btn-full" onclick="speakStudyText('${String(r.word).replace(/'/g,"\\'")}')">🔊 发音</button>
+        <button class="btn btn-primary btn-full" onclick="openDetail('${r.wordId}','mistakes')">查看单词</button>
+      </div>
+    </div>`).join('');
+}
 function startPrimaryStudy(){
   const session=getDailySession();
   if(!session.learn||!session.learn.completed){startDailyLearn();return}
@@ -1086,7 +1345,7 @@ function learnShow(){
   if(!part||part.completed){learnComplete();return}
   if(part.stage==='exposure'){
     if(part.index>=part.wordIds.length){
-      part.stage='training';part.tasks=createTasks(part.wordIds,'learn');part.taskIndex=0;
+      part.stage='training';part.tasks=createTasks([...(part.wordIds||[]),...(part.practiceIds||[])],'learn');part.taskIndex=0;
       DB.session.set(session);learnShow();return;
     }
     const w=DB.words.get().find(x=>x.id===part.wordIds[part.index]);
@@ -1171,6 +1430,7 @@ function renderQuiz(w){
   qs('#quiz-options').innerHTML='';
   qs('#letter-bank').innerHTML='';
   qs('#spell-answer').style.display='none';
+  qs('#spell-controls').style.display='none';
   if(['enZh','zhEn','audio','cloze'].includes(App.learnMode)){
     const answerField=App.learnMode==='enZh'?'zhMeaning':'word';
     if(App.learnMode==='enZh'){
@@ -1198,10 +1458,11 @@ function renderQuiz(w){
     qs('#quiz-prompt-label').textContent=w.word.includes(' ')?'按顺序拼出英文短语':'选择字母拼出英文单词';
     prompt.textContent=w.zhMeaning;
     qs('#spell-answer').style.display='block';
+    qs('#spell-controls').style.display='flex';
     App.spellParts=w.word.includes(' ')?w.word.split(/\s+/):[...w.word];
     App.spellSelected=[];
     const tiles=shuffled(App.spellParts.map((value,index)=>({value,index})));
-    qs('#letter-bank').innerHTML=tiles.map(x=>`<button class="letter-tile" data-value="${x.value.replace(/"/g,'&quot;')}" onclick="spellPick(this)">${x.value}</button>`).join('');
+    qs('#letter-bank').innerHTML=tiles.map(x=>`<button class="letter-tile" data-key="${x.index}" data-value="${x.value.replace(/"/g,'&quot;')}" onclick="spellPick(this)">${x.value}</button>`).join('');
     updateSpellAnswer();
   }
 }
@@ -1225,28 +1486,63 @@ function quizChoose(button){
     if(correct)speakStudyText(value);
     else speakStudyText(value,()=>speakStudyWord(App.learnQueue[App.learnIdx]?.word));
   }
-  recordQuizResult(correct,selectedIsEnglish);
+  recordQuizResult(correct,selectedIsEnglish,value,answer);
 }
 
 function spellPick(button){
-  if(App.quizAnswered||button.disabled)return;
+  if(App.quizAnswered)return;
   speakStudyText(button.dataset.value);
-  App.spellSelected.push(button.dataset.value);
-  button.disabled=true;button.style.opacity='.35';
-  updateSpellAnswer();
-  if(App.spellSelected.length===App.spellParts.length){
-    App.quizAnswered=true;
-    const separator=App.learnQueue[App.learnIdx].word.includes(' ')?' ':'';
-    recordQuizResult(App.spellSelected.join(separator).toLowerCase()===App.learnQueue[App.learnIdx].word.toLowerCase());
+  const key=button.dataset.key;
+  const existing=App.spellSelected.findIndex(x=>x.key===key);
+  if(existing>-1){
+    App.spellSelected.splice(existing,1);
+    button.classList.remove('selected');
+  }else{
+    App.spellSelected.push({key,value:button.dataset.value});
+    button.classList.add('selected');
   }
+  updateSpellAnswer();
 }
 
 function updateSpellAnswer(){
   const separator=App.learnQueue[App.learnIdx]?.word.includes(' ')?' ':'';
-  qs('#spell-answer').textContent=App.spellSelected.join(separator)||'…';
+  const answer=qs('#spell-answer');
+  if(!App.spellSelected.length){answer.textContent='…';return}
+  answer.innerHTML=App.spellSelected.map((x,i)=>`<span class="spell-answer-chip" onclick="spellRemoveAt(${i})">${x.value}</span>`).join(separator?' ':'');
 }
 
-function recordQuizResult(correct,skipSpeech=false){
+function spellRemoveAt(index){
+  if(App.quizAnswered)return;
+  const item=App.spellSelected[index];if(!item)return;
+  App.spellSelected.splice(index,1);
+  const btn=qs(`.letter-tile[data-key="${item.key}"]`);
+  btn?.classList.remove('selected');
+  updateSpellAnswer();
+}
+
+function spellBackspace(){
+  if(App.quizAnswered||!App.spellSelected.length)return;
+  spellRemoveAt(App.spellSelected.length-1);
+}
+
+function spellClear(){
+  if(App.quizAnswered)return;
+  App.spellSelected=[];
+  qsa('.letter-tile').forEach(b=>b.classList.remove('selected'));
+  updateSpellAnswer();
+}
+
+function spellSubmit(){
+  if(App.quizAnswered)return;
+  const w=App.learnQueue[App.learnIdx];if(!w)return;
+  if(App.spellSelected.length!==App.spellParts.length){showToast('还没有拼完整，可以继续选择或修改');return}
+  App.quizAnswered=true;
+  const separator=w.word.includes(' ')?' ':'';
+  const typed=App.spellSelected.map(x=>x.value).join(separator);
+  recordQuizResult(typed.toLowerCase()===w.word.toLowerCase(),false,typed,w.word);
+}
+
+function recordQuizResult(correct,skipSpeech=false,userAnswer='',correctAnswer=''){
   const w=App.learnQueue[App.learnIdx];
   const session=getDailySession(),part=session[App.studyType],task=part.tasks[part.taskIndex];
   const result=part.results[w.id]||{correct:0,wrong:0};
@@ -1258,10 +1554,24 @@ function recordQuizResult(correct,skipSpeech=false){
   const stats=DB.stats.get(),mistakes=stats.mistakes||{};
   if(!correct)mistakes[w.id]=(mistakes[w.id]||0)+1;
   else if(mistakes[w.id])mistakes[w.id]=Math.max(0,mistakes[w.id]-1);
+  if(correct&&stats.mistakeQueue?.[w.id])delete stats.mistakeQueue[w.id];
   stats.mistakes=mistakes;
   stats.quizCorrect=(stats.quizCorrect||0)+(correct?1:0);
   stats.quizWrong=(stats.quizWrong||0)+(correct?0:1);
   DB.stats.set(stats);
+  upsertHistoryRecord({
+    id:uid(),
+    date:today(),
+    time:new Date().toISOString(),
+    studyType:App.studyType,
+    wordId:w.id,
+    word:w.word,
+    zhMeaning:w.zhMeaning,
+    mode:task.mode,
+    correct,
+    userAnswer:userAnswer||'',
+    correctAnswer:correctAnswer||w.word
+  });
   DB.session.set(session);
   if(!skipSpeech)speakStudyWord(w.word);
   const detail=[w.plainMeaning,w.contextMeaning].filter(Boolean).join(' ');
@@ -1278,9 +1588,34 @@ function speakStudyWord(word){
   speakStudyText(word);
 }
 
-function speakStudyText(text,onend){
+function normalizeSpeechText(text){
+  const s=String(text||'').trim();
+  const map={
+    'LLM':'L L M','GLM':'G L M','API':'A P I','CLI':'C L I','UI':'U I','UX':'U X','GPU':'G P U','CPU':'C P U','VRAM':'V ram','FP16':'F P sixteen','BF16':'B F sixteen','INT8':'int eight','INT4':'int four',
+    'Dockerfile':'Docker file','ConfigMap':'config map','Kubernetes':'koo ber NET ees','YAML':'YAML','JSON':'J son','JWT':'J W T','HTTP':'H T T P','HTTPS':'H T T P S','URL':'U R L','URI':'U R I'
+  };
+  if(map[s])return map[s];
+  return s.replace(/\bDockerfile\b/g,'Docker file')
+    .replace(/\bConfigMap\b/g,'config map')
+    .replace(/\bLLM\b/g,'L L M')
+    .replace(/\bGLM\b/g,'G L M')
+    .replace(/\bAPI\b/g,'A P I')
+    .replace(/\bCLI\b/g,'C L I')
+    .replace(/\bJWT\b/g,'J W T');
+}
+
+function pickEnglishVoice(lang='en-US'){
+  if(!('speechSynthesis' in window))return null;
+  const voices=speechSynthesis.getVoices()||[];
+  const exact=voices.filter(v=>v.lang===lang);
+  return exact.find(v=>/Samantha|Alex|Google|Microsoft|Natural|Premium/i.test(v.name))||exact[0]||voices.find(v=>/^en[-_]/i.test(v.lang))||null;
+}
+
+function speakStudyText(text,onend,lang='en-US'){
   if(!text||!('speechSynthesis' in window))return;
-  const u=new SpeechSynthesisUtterance(text);u.lang='en-US';
+  const u=new SpeechSynthesisUtterance(normalizeSpeechText(text));u.lang=lang;
+  const voice=pickEnglishVoice(lang);if(voice)u.voice=voice;
+  u.rate=.86;u.pitch=1;
   if(onend)u.onend=onend;
   speechSynthesis.cancel();speechSynthesis.speak(u);
 }
@@ -1304,11 +1639,11 @@ function learnToggleStar(){
 
 function finishStudySession(){
   const session=getDailySession(),part=session[App.studyType];
-  part.wordIds.forEach(id=>{
+  [...new Set([...(part.wordIds||[]),...(part.practiceIds||[])])].forEach(id=>{
     const word=DB.words.get().find(w=>w.id===id);if(!word)return;
     const result=part.results[id]||{correct:0,wrong:0};
     const answer=result.wrong===0?'known':result.correct>0?'fuzzy':'unknown';
-    if(App.studyType==='learn'){
+    if(App.studyType==='learn'&&(part.wordIds||[]).includes(id)){
       DB.words.update(id,{status:answer,nextReview:Date.now()+DAY,reviewCount:answer==='known'?1:0,attemptCount:(word.attemptCount||0)+1,lastReviewedAt:Date.now()});
     }else{
       DB.words.update(id,calcNextReview(word,answer));
@@ -1323,7 +1658,7 @@ function finishStudySession(){
   const hist=stats.history||[],todayH=hist.find(h=>h.date===todayStr);
   const n=App.studyType==='learn'?part.wordIds.length:0,r=App.studyType==='review'?part.wordIds.length:0;
   if(todayH){todayH.n=(todayH.n||0)+n;todayH.r=(todayH.r||0)+r}
-  else hist.push({date:todayStr,n,r});
+  else hist.push({date:todayStr,n,r,correct:0,wrong:0,records:[]});
   stats.history=hist.slice(-60);DB.stats.set(stats);
   learnComplete();
 }
@@ -1339,14 +1674,16 @@ function learnComplete(){
   qs('#complete-sub').textContent=`训练正确率 ${total?Math.round(totals.correct/total*100):0}% · 错题 ${totals.wrong} 次`;
   qs('#complete-new').textContent=App.studyType==='learn'?(part?.wordIds.length||0):0;
   qs('#complete-review').textContent=App.studyType==='review'?(part?.wordIds.length||0):0;
+  const mistakeBtn=qs('#complete-mistakes-btn');
+  const wrongToday=getDayWrongRecords(today()).length;
+  mistakeBtn.style.display=wrongToday?'inline-flex':'none';
+  mistakeBtn.textContent=`查看今日错题 ${wrongToday}`;
 }
 
 function speakWord(accent){
   const word=qs('#learn-word').textContent;
   if(!word)return;
-  const u=new SpeechSynthesisUtterance(word);
-  u.lang=accent==='uk'?'en-GB':'en-US';
-  speechSynthesis.cancel();speechSynthesis.speak(u);
+  speakStudyText(word,null,accent==='uk'?'en-GB':'en-US');
 }
 
 // ============================================================
@@ -1527,7 +1864,7 @@ function detailBack(){
   el.classList.add('active');
   App.prevPage='detail';App.currentPage=target;
   qsa('.nav-item').forEach(item=>item.classList.toggle('active',item.dataset.page===target));
-  qs('#bottom-nav').style.display=['learn','today','add','settings','detail'].includes(target)?'none':'flex';
+  qs('#bottom-nav').style.display=['learn','today','calendar','mistakes','add','settings','detail'].includes(target)?'none':'flex';
 }
 
 function detailToggleStar(){
@@ -1544,8 +1881,7 @@ function detailDelete(){
 }
 function speakDetailWord(accent){
   const word=qs('#detail-word').textContent;if(!word)return;
-  const u=new SpeechSynthesisUtterance(word);u.lang=accent==='uk'?'en-GB':'en-US';
-  speechSynthesis.cancel();speechSynthesis.speak(u);
+  speakStudyText(word,null,accent==='uk'?'en-GB':'en-US');
 }
 
 // ============================================================
@@ -1727,6 +2063,19 @@ function migrateWords(input){
   });
 }
 
+function migrateStats(){
+  const stats=DB.stats.get();
+  const hist=(stats.history||[]).map(normalizeHistoryEntry).filter(Boolean);
+  const learnedDays=hist.filter(h=>h.n||h.r||h.records.length).length;
+  DB.stats.set({
+    ...stats,
+    history:hist.slice(-180),
+    totalDays:Math.max(stats.totalDays||0,learnedDays),
+    mistakes:stats.mistakes||{},
+    mistakeQueue:stats.mistakeQueue||{}
+  });
+}
+
 function initializeData(){
   const existing=DB.words.get();
   const now=Date.now();
@@ -1744,6 +2093,14 @@ function initializeData(){
         const added=normalizeRuntimeWord({...preset,createdAt:now,nextReview:now,attemptCount:0,lastReviewedAt:null},now);
         words.push(added);byId.set(added.id,added);
       }else{
+        if(meta.schemaVersion<5&&(preset.id==='w206'||String(preset.id).startsWith('ui'))){
+          ['word','phonetic','zhMeaning','enMeaning','plainMeaning','contextMeaning','confusions','example','exampleZh','notes','source'].forEach(key=>{
+            if(preset[key]!==undefined)current[key]=preset[key];
+          });
+          ['knowledge','collocations','tags'].forEach(key=>{
+            if(Array.isArray(preset[key]))current[key]=[...new Set([...(current[key]||[]),...preset[key]])];
+          });
+        }
         ['plainMeaning','contextMeaning','confusions','wordType','register','sourceRefs'].forEach(key=>{
           if((current[key]===undefined||current[key]===''||current[key]===null)&&preset[key]!==undefined)current[key]=preset[key];
         });
@@ -1760,6 +2117,7 @@ function initializeData(){
   if(meta.schemaVersion!==DATA_SCHEMA_VERSION||meta.appVersion!==APP_VERSION){
     DB.meta.set({schemaVersion:DATA_SCHEMA_VERSION,appVersion:APP_VERSION,migratedAt:new Date().toISOString()});
   }
+  migrateStats();
 }
 
 initializeData();

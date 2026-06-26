@@ -1,7 +1,7 @@
 {
   "name": "TechWords - 技术词汇本",
   "short_name": "TechWords",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "面向 Claude、GitHub、技术文档的个人英语词汇学习工具",
   "start_url": "./index.html",
   "display": "standalone",
